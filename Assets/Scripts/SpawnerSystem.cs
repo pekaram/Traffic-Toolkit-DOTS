@@ -6,6 +6,8 @@ using Unity.Burst;
 [BurstCompile]
 public partial struct SpawnerSystem : ISystem
 {
+    private int count;
+
     public void OnCreate(ref SystemState state) { }
 
     public void OnDestroy(ref SystemState state) { }
@@ -25,7 +27,7 @@ public partial struct SpawnerSystem : ISystem
     private void ProcessSpawner(ref SystemState state, RefRW<Spawner> spawner)
     {
         // If the next spawn time has passed.
-        if (spawner.ValueRO.NextSpawnTime < SystemAPI.Time.ElapsedTime)
+        if (spawner.ValueRO.NextSpawnTime < SystemAPI.Time.ElapsedTime && count < 20000)
         {
             // Spawns a new entity and positions it at the spawner.
             Entity newEntity = state.EntityManager.Instantiate(spawner.ValueRO.Prefab);
@@ -34,6 +36,8 @@ public partial struct SpawnerSystem : ISystem
 
             // Resets the next spawn time.
             spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + spawner.ValueRO.SpawnRate;
+            
+            count++; 
         }
     }
 }

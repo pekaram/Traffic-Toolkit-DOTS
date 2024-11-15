@@ -1,2 +1,2 @@
-# 10000+ Traffic system
+Traffic system
 

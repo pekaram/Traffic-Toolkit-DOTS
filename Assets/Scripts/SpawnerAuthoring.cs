@@ -12,7 +12,7 @@ class SpawnerBaker : Baker<SpawnerAuthoring>
 {
     public override void Bake(SpawnerAuthoring authoring)
     {
-       var entity = GetEntity(TransformUsageFlags.None);
+        var entity = GetEntity(TransformUsageFlags.None);
         AddComponent(entity, new Spawner
         {
             // By default, each authoring GameObject turns into an Entity.

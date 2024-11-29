@@ -2,6 +2,7 @@ using System.Linq;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Burst;
+using System;
 
 [BurstCompile]
 public partial struct SpawnerSystem : ISystem
@@ -27,7 +28,7 @@ public partial struct SpawnerSystem : ISystem
     private void ProcessSpawner(ref SystemState state, RefRW<Spawner> spawner)
     {
         // If the next spawn time has passed.
-        if (spawner.ValueRO.NextSpawnTime < SystemAPI.Time.ElapsedTime && count < 20000)
+        if (spawner.ValueRO.NextSpawnTime < SystemAPI.Time.ElapsedTime && count < 5000)
         {
             // Spawns a new entity and positions it at the spawner.
             Entity newEntity = state.EntityManager.Instantiate(spawner.ValueRO.Prefab);
@@ -37,6 +38,11 @@ public partial struct SpawnerSystem : ISystem
             // Resets the next spawn time.
             spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + spawner.ValueRO.SpawnRate;
             
+            if(count > 0 && count % 1000 == 0)
+            {
+                UnityEngine.Debug.LogError("1000 Capusles Added!");
+            }
+
             count++; 
         }
     }

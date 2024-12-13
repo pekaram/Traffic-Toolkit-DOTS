@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 883728093}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -191,6 +191,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Traffic Car (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -200,16 +204,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 53075314}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &64399232 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 8066321775468517104, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &168752674 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4504469789766922237, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &190924893
 PrefabInstance:
@@ -222,7 +216,7 @@ PrefabInstance:
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Lane
       value: 
-      objectReference: {fileID: 168752674}
+      objectReference: {fileID: 1887057097}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
       value: 1
@@ -283,6 +277,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Traffic Car (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -323,7 +321,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1564451385}
-  - {fileID: 2082606694}
+  - {fileID: 470751599}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &371438058 stripped
@@ -364,7 +362,7 @@ Transform:
   - {fileID: 2062111840}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &390652463
+--- !u!1001 &470751598
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -374,79 +372,43 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_Name
-      value: 2LaneRoad (-Z)
+      value: '2LaneRoad (-Z) '
       objectReference: {fileID: 0}
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2020993532}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[1]'
-      value: 
-      objectReference: {fileID: 64399232}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[2]'
-      value: 
-      objectReference: {fileID: 1487610730}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[3]'
-      value: 
-      objectReference: {fileID: 627663291}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[4]'
-      value: 
-      objectReference: {fileID: 1921283801}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[5]'
-      value: 
-      objectReference: {fileID: 1155515056}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[6]'
-      value: 
-      objectReference: {fileID: 1173227840}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[7]'
-      value: 
-      objectReference: {fileID: 728026261}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[8]'
-      value: 
-      objectReference: {fileID: 2047288808}
-    - target: {fileID: 2696350836296578256, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: 'Renderers.Array.data[9]'
-      value: 
-      objectReference: {fileID: 1089946300}
-    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -22
-      objectReference: {fileID: 0}
-    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-      propertyPath: m_LocalRotation.w
+    - target: {fileID: 1324688091458454665, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalScale.y
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -454,7 +416,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -465,15 +427,15 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
---- !u!23 &627663291 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7892935118013061970, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
+--- !u!4 &470751599 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+  m_PrefabInstance: {fileID: 470751598}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &728026261 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1526937148508076098, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
+--- !u!1 &470751600 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4504469789766922237, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+  m_PrefabInstance: {fileID: 470751598}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &817643539
 PrefabInstance:
@@ -486,7 +448,7 @@ PrefabInstance:
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Lane
       value: 
-      objectReference: {fileID: 168752674}
+      objectReference: {fileID: 1887057097}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
       value: 1
@@ -547,6 +509,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Traffic Car (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -597,21 +563,6 @@ Transform:
   - {fileID: 1589649627}
   m_Father: {fileID: 383694527}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &1089946300 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 6882400605263254392, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &1155515056 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 245967645447183026, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &1173227840 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 8034869830557026144, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1237817772
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -626,7 +577,7 @@ PrefabInstance:
       objectReference: {fileID: 883728093}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -683,6 +634,10 @@ PrefabInstance:
     - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_Name
       value: Traffic Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -754,6 +709,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6472423748974002130, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6472423748974002130, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 30
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -773,7 +736,7 @@ PrefabInstance:
       objectReference: {fileID: 371438058}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -841,11 +804,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 1372042113}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &1487610730 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 125605667804740968, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1564451385 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
@@ -865,7 +823,7 @@ PrefabInstance:
       objectReference: {fileID: 371438058}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -944,7 +902,7 @@ PrefabInstance:
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Lane
       value: 
-      objectReference: {fileID: 168752674}
+      objectReference: {fileID: 1887057097}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
       value: 1
@@ -1005,6 +963,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Traffic Car
       objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1026,10 +988,10 @@ PrefabInstance:
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Lane
       value: 
-      objectReference: {fileID: 1969554531}
+      objectReference: {fileID: 470751600}
     - target: {fileID: -2014008350405946734, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: Speed
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -1087,6 +1049,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Traffic Car (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 7817377085323068582, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1097,25 +1063,10 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7437474499744079388, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 1867257987}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &1921283801 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1475374319269191736, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1969554531 stripped
+--- !u!1 &1887057097 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8924460213788120671, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &2020993532 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 6113169581464734759, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &2047288808 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1419938088387068584, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
+  m_PrefabInstance: {fileID: 470751598}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2062111839
 GameObject:
@@ -1152,11 +1103,6 @@ Transform:
   - {fileID: 1867257988}
   m_Father: {fileID: 383694527}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!4 &2082606694 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5014884007275230816, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
-  m_PrefabInstance: {fileID: 390652463}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

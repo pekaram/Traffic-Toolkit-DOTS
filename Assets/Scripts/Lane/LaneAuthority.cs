@@ -1,13 +1,11 @@
-using System.Text;
 using UnityEngine;
 using Unity.Entities;
-using Unity.Transforms;
-using System.Collections.Generic;
-using System.Linq;
+
 
 class LaneAuthoring : MonoBehaviour
 {
-    public List<Renderer> Renderers;
+    public Renderer Start;
+    public Renderer End;
 }
 
 class LaneBaker : Baker<LaneAuthoring>
@@ -17,9 +15,9 @@ class LaneBaker : Baker<LaneAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent(entity, new Lane
         {
-            Width = authoring.Renderers[0].bounds.size.x,
-            StartPoint = authoring.Renderers[0].bounds.center,
-            EndPoint = authoring.Renderers[authoring.Renderers.Count - 1].bounds.center,
+            Width = authoring.Start.bounds.size.x,
+            StartPoint = authoring.Start.bounds.center,
+            EndPoint = authoring.End.bounds.center,
         });
     }
 }

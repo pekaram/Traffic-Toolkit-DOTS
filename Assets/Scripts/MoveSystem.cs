@@ -10,17 +10,27 @@ public partial struct MoveSystem : ISystem
     {
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
+            if(vehicle.ValueRW.Lane ==  Entity.Null)
+            {
+                continue;
+            }
+
             var deltaTime = SystemAPI.Time.DeltaTime;
+            const float DistanceThreshold = 2;
 
             var lane = SystemAPI.GetComponent<Lane>(vehicle.ValueRW.Lane);
             var currentPosition = transform.ValueRW.Position;
             var direction = math.normalize(lane.EndPoint - lane.StartPoint);
 
-            float distance = vehicle.ValueRW.Speed * deltaTime;
-            float3 nextPosition = currentPosition + direction * distance;
+            var distance = vehicle.ValueRW.Speed * deltaTime;
+            var nextPosition = currentPosition + direction * distance;
 
-            transform.ValueRW.Position = nextPosition;
-            //spawner.ValueRW.Position = spawner.ValueRW.Position + new float3(0.01f, 0.01f, 0.01f);
+            if (math.distance(nextPosition, lane.EndPoint) < DistanceThreshold)
+            {
+                vehicle.ValueRW.Speed = 0;
+                vehicle.ValueRW.Lane = Entity.Null;
+                continue;
+            }
         }
     }
 }

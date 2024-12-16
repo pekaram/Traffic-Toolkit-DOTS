@@ -3,17 +3,15 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public partial struct MoveSystem : ISystem
+public partial struct NavigationSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
-            if(vehicle.ValueRW.Lane ==  Entity.Null)
-            {
+            if (vehicle.ValueRW.Speed == 0)
                 continue;
-            }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
             const float DistanceThreshold = 2;
@@ -25,11 +23,10 @@ public partial struct MoveSystem : ISystem
             var distance = vehicle.ValueRW.Speed * deltaTime;
             var nextPosition = currentPosition + direction * distance;
 
-            if (math.distance(nextPosition, lane.EndPoint) < DistanceThreshold)
+            var isRoadEnd = math.distance(nextPosition, lane.EndPoint) < DistanceThreshold;
+            if (isRoadEnd)
             {
                 vehicle.ValueRW.Speed = 0;
-                vehicle.ValueRW.Lane = Entity.Null;
-                continue;
             }
         }
     }

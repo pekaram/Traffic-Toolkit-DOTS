@@ -1,11 +1,9 @@
 using UnityEngine;
 using Unity.Entities;
 
-
 class LaneAuthoring : MonoBehaviour
 {
-    public Renderer Start;
-    public Renderer End;
+    public Vector3[] Waypoints;
 }
 
 class LaneBaker : Baker<LaneAuthoring>
@@ -15,9 +13,14 @@ class LaneBaker : Baker<LaneAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent(entity, new Lane
         {
-            Width = authoring.Start.bounds.size.x,
-            StartPoint = authoring.Start.bounds.center,
-            EndPoint = authoring.End.bounds.center,
+            Width = 0,
+            LaneEntity = entity
         });
+
+        var waypointsBuffer = AddBuffer<Waypoint>(entity);
+        foreach(var waypoint in authoring.Waypoints)
+        {
+            waypointsBuffer.Add(new Waypoint { Position = waypoint });
+        }
     }
 }

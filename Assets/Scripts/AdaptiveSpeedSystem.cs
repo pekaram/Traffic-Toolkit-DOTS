@@ -11,42 +11,40 @@ public partial class AdaptiveSpeedSystem : SystemBase
         // Query all vehicles and their associated transforms
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
-            // Ensure the vehicle has a valid LaneEntity
+            //Ensure the vehicle has a valid LaneEntity
             if (vehicle.ValueRW.Lane == Entity.Null)
                 continue;
 
-            // Retrieve the Lane component
-            Lane lane = SystemAPI.GetComponent<Lane>(vehicle.ValueRW.Lane);
+       
+            if (math.distance(vehicle.ValueRO.WaypointPosition, transform.ValueRO.Position) < 4)
+            {
+                vehicle.ValueRW.Speed = 0;
+            }
 
             float3 currentPosition = transform.ValueRW.Position;
+            var vehicleMoveDirection = math.normalize(vehicle.ValueRO.WaypointPosition - currentPosition);
 
             // Initialize adaptive speed
-            float adjustedSpeed = vehicle.ValueRW.Speed;
+            var adjustedSpeed = vehicle.ValueRW.Speed;
 
             // Query other vehicles in the same lane
             foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
             {
-                // Skip the current vehicle itself
-                if (otherVehicle.Equals(vehicle))
+                if (otherVehicle.ValueRO.Lane != vehicle.ValueRO.Lane)
                     continue;
-
-                // Ensure the other vehicle is on the same lane
-                // Frontal vehicle can be null first off 
-                if (otherVehicle.ValueRW.Lane != vehicle.ValueRW.Lane)
-                {
-                    continue;
-                }
 
                 float3 otherPosition = otherTransform.ValueRW.Position;
 
-                // Check if the other vehicle is ahead on the same lane
-                float3 laneDirection = math.normalize(lane.EndPoint - lane.StartPoint);
-                float3 toOtherVehicle = otherPosition - currentPosition;
-                float distanceAlongLane = math.dot(toOtherVehicle, laneDirection);
-                if (distanceAlongLane > 0 && distanceAlongLane < 20f) // Adjust threshold distance as needed
+                // Check if the other vehicle is ahead 
+                float3 distanceToOtherVehicle = otherPosition - currentPosition;
+                var directiontoOtherVehicle = math.normalize(distanceToOtherVehicle);
+
+
+                float distanceAlongLane = math.dot(distanceToOtherVehicle, vehicleMoveDirection);
+                if (distanceAlongLane > 0
+                    && distanceAlongLane < 10)
                 {
-                  // Slow down to maintain safe following distance
-                    float stoppingDistance = 15f; // Minimum distance to the vehicle ahead
+                    // Slow down to maintain safe following distance
                     adjustedSpeed = otherVehicle.ValueRO.Speed;
                 }
             }
@@ -55,8 +53,17 @@ public partial class AdaptiveSpeedSystem : SystemBase
             vehicle.ValueRW.Speed = adjustedSpeed;
 
             // Move the vehicle forward at the adjusted speed
-            float3 direction = math.normalize(lane.EndPoint - currentPosition);
-            transform.ValueRW.Position += direction * adjustedSpeed * deltaTime;
+            transform.ValueRW.Position += transform.ValueRO.Forward() * adjustedSpeed * deltaTime;
+
+            // Update the Rotation component directly
+            if (math.lengthsq(vehicleMoveDirection) > 0.005f && adjustedSpeed > 0) // Avoid division by zero
+            {
+                var targetRotation = quaternion.LookRotationSafe(vehicleMoveDirection, math.up());
+                //transform.ValueRW.Rotation = targetRotation;
+                transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 0.5f); // Smooth rotation
+            }
+
         }
+
     }
 }

@@ -1,9 +1,7 @@
 #if UNITY_EDITOR
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
+
 
 [CustomEditor(typeof(LaneAuthoring))]
 public class LaneAuthoringEditor : Editor
@@ -12,6 +10,7 @@ public class LaneAuthoringEditor : Editor
 
     private void OnEnable()
     {
+        if(Selection.activeGameObject != null)
         _lane = Selection.activeGameObject.GetComponent<LaneAuthoring>();
     }
 
@@ -22,11 +21,8 @@ public class LaneAuthoringEditor : Editor
 
     private void Draw(LaneAuthoring lane)
     {
-        if (lane == null || lane.Waypoints == null || lane.Waypoints.Length == 0)
-        {
-            Debug.LogError("null waypoint");
+        if (lane.Waypoints == null || lane.Waypoints.Length == 0)
             return;
-        }
 
         // Iterate over waypoints and draw position handles
         for (int i = 0; i < lane.Waypoints.Length; i++)
@@ -75,7 +71,7 @@ public class LaneAuthoringEditor : Editor
     private void DeleteWaypoint(LaneAuthoring lane, int index)
     {
         // Ensure we have more than one waypoint to delete
-        if (lane.Waypoints.Length <= 1) return;
+        if (lane.Waypoints.Length == 0) return;
 
         // Record undo state for deleting waypoint
         Undo.RecordObject(lane, "Delete Waypoint");

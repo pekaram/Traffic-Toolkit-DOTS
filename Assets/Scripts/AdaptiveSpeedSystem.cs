@@ -60,7 +60,7 @@ public partial class AdaptiveSpeedSystem : SystemBase
             {
                 var targetRotation = quaternion.LookRotationSafe(vehicleMoveDirection, math.up());
                 //transform.ValueRW.Rotation = targetRotation;
-                transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 0.5f); // Smooth rotation
+                transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 5); // Smooth rotation
             }
 
         }

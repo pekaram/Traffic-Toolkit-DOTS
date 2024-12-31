@@ -1,7 +1,7 @@
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-
 
 [CustomEditor(typeof(LaneAuthoring))]
 public class LaneAuthoringEditor : Editor
@@ -16,67 +16,100 @@ public class LaneAuthoringEditor : Editor
 
     private void OnSceneGUI()
     {
-        Draw(_lane);
-    }
-
-    private void Draw(LaneAuthoring lane)
-    {
-        if (lane.Waypoints == null || lane.Waypoints.Length == 0)
+        if (_lane == null || _lane.Waypoints == null || _lane.Waypoints.Length == 0)
             return;
 
-        // Iterate over waypoints and draw position handles
-        for (int i = 0; i < lane.Waypoints.Length; i++)
+        for (int i = 0; i < _lane.Waypoints.Length; i++)
         {
-            var currentWaypoint = lane.Waypoints[i];
-
-            // Draw a PositionHandle
-            EditorGUI.BeginChangeCheck();
-            Vector3 newPosition = Handles.PositionHandle(currentWaypoint, Quaternion.identity);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                // Record the change for undo/redo functionality
-                Undo.RecordObject(lane, "Move Waypoint");
-                lane.Waypoints[i] = newPosition;
-                EditorUtility.SetDirty(lane);
-            }
-
-            // Draw a label and a small sphere for better visualization
-            Handles.Label(currentWaypoint, $"Waypoint {i}");
-            Handles.SphereHandleCap(0, currentWaypoint, Quaternion.identity, 0.5f, EventType.Repaint);
-
-            // Right-click to delete a waypoint
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
-            {
-                // Handle right-click (Delete waypoint)
-                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-                float distance = HandleUtility.DistanceToCircle(currentWaypoint, 0.5f);
-
-                if (distance < 1f) // Right-click is near a waypoint
-                {
-                    Event.current.Use(); // Consume the event
-                    DeleteWaypoint(lane, i);
-                }
-            }
+            Draw(i);
+            HandleWaypointDrag(i);
+            HandleWaypointDelete(i);
         }
 
-        // Draw connecting lines between waypoints
-        Handles.color = Color.yellow;
-        for (int i = 0; i < lane.Waypoints.Length - 1; i++)
+        HandleWaypointAdd();
+    }
+
+    private void HandleWaypointDrag(int i)
+    {
+        var currentWaypoint = _lane.Waypoints[i];
+
+        EditorGUI.BeginChangeCheck();
+        Vector3 newPosition = Handles.PositionHandle(currentWaypoint, Quaternion.identity);
+
+        if (!EditorGUI.EndChangeCheck())
+            return;
+
+        Undo.RecordObject(_lane, "Move Waypoint");
+        _lane.Waypoints[i] = newPosition;
+        EditorUtility.SetDirty(_lane);
+    }
+
+    private void HandleWaypointDelete(int i)
+    {
+        var isRightClick = Event.current.type == EventType.MouseDown && Event.current.button == 1;
+        if (!isRightClick || !Event.current.shift)
+            return;
+
+        var currentWaypoint = _lane.Waypoints[i];
+        var distance = HandleUtility.DistanceToCircle(currentWaypoint, 0.5f);
+
+        if (distance < 1f)
         {
-            Handles.DrawLine(lane.Waypoints[i], lane.Waypoints[i + 1]);
+            DeleteWaypoint(_lane, i);
+            Event.current.Use();
         }
+    }
+
+    private void Draw(int i)
+    {
+        var currentWaypoint = _lane.Waypoints[i];
+        Handles.color = Color.blue;
+        Handles.Label(currentWaypoint, $"Waypoint {i}");
+        Handles.SphereHandleCap(0, currentWaypoint, Quaternion.identity, 0.5f, EventType.Repaint);
+
+        if (_lane.Waypoints.Length - i > 1)
+        {
+            Handles.color = Color.yellow;
+            Handles.DrawLine(_lane.Waypoints[i], _lane.Waypoints[i + 1]);
+        }
+    }
+
+    private void HandleWaypointAdd()
+    {
+        var leftMouseClick = Event.current.type == EventType.MouseDown && Event.current.button == 0;
+        if (!leftMouseClick || !Event.current.shift)
+            return;
+
+        var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        var plane = new Plane(Vector3.up, Vector3.zero);
+
+        // Find the intersection point
+        if (!plane.Raycast(ray, out float distance))
+            return;
+
+        var clickPosition = ray.GetPoint(distance);
+        
+        Undo.RecordObject(_lane, "Add Waypoint");
+        AddWaypoint(_lane, clickPosition);
+        EditorUtility.SetDirty(_lane);
+
+        Event.current.Use();
+    }
+
+    private void AddWaypoint(LaneAuthoring lane, Vector3 position)
+    {
+        var waypoints = lane.Waypoints.ToList();
+        waypoints.Add(position);
+        lane.Waypoints = waypoints.ToArray();
     }
 
     private void DeleteWaypoint(LaneAuthoring lane, int index)
     {
-        // Ensure we have more than one waypoint to delete
-        if (lane.Waypoints.Length == 0) return;
+         if (lane.Waypoints.Length == 0) 
+            return;
 
-        // Record undo state for deleting waypoint
-        Undo.RecordObject(lane, "Delete Waypoint");
+         Undo.RecordObject(lane, "Delete Waypoint");
 
-        // Remove the waypoint at the specified index
         var waypointList = new System.Collections.Generic.List<Vector3>(lane.Waypoints);
         waypointList.RemoveAt(index);
         lane.Waypoints = waypointList.ToArray();

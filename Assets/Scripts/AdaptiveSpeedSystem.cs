@@ -12,10 +12,9 @@ public partial class AdaptiveSpeedSystem : SystemBase
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
             //Ensure the vehicle has a valid LaneEntity
-            if (vehicle.ValueRW.Lane == Entity.Null)
+            if (vehicle.ValueRW.CurrentLane == Entity.Null)
                 continue;
 
-       
             if (math.distance(vehicle.ValueRO.WaypointPosition, transform.ValueRO.Position) < 4)
             {
                 vehicle.ValueRW.Speed = 0;
@@ -30,8 +29,10 @@ public partial class AdaptiveSpeedSystem : SystemBase
             // Query other vehicles in the same lane
             foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
             {
-                if (otherVehicle.ValueRO.Lane != vehicle.ValueRO.Lane)
+
+                if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane && vehicle.ValueRO.NextLane != otherVehicle.ValueRO.CurrentLane)
                     continue;
+
 
                 float3 otherPosition = otherTransform.ValueRW.Position;
 
@@ -39,12 +40,11 @@ public partial class AdaptiveSpeedSystem : SystemBase
                 float3 distanceToOtherVehicle = otherPosition - currentPosition;
                 var directiontoOtherVehicle = math.normalize(distanceToOtherVehicle);
 
-
                 float distanceAlongLane = math.dot(distanceToOtherVehicle, vehicleMoveDirection);
                 if (distanceAlongLane > 0
                     && distanceAlongLane < 10)
                 {
-                    // Slow down to maintain safe following distance
+                     // Slow down to maintain safe following distance
                     adjustedSpeed = otherVehicle.ValueRO.Speed;
                 }
             }

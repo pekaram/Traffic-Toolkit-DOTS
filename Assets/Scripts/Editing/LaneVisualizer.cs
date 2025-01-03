@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,26 +9,54 @@ public class LaneAuthoringEditor : Editor
 
     private void OnEnable()
     {
-        if(Selection.activeGameObject != null)
-        _lane = Selection.activeGameObject.GetComponent<LaneAuthoring>();
+        if (Selection.activeGameObject != null)
+        {
+            _lane = Selection.activeGameObject.GetComponent<LaneAuthoring>();
+        }
     }
 
     private void OnSceneGUI()
     {
-        if (_lane == null || _lane.Waypoints == null || _lane.Waypoints.Length == 0)
+        if (_lane == null || _lane.Waypoints == null || _lane.Waypoints.Count == 0)
             return;
 
-        for (int i = 0; i < _lane.Waypoints.Length; i++)
+        for (var i = 0; i < _lane.Waypoints.Count; i++)
         {
-            Draw(i);
-            HandleWaypointDrag(i);
-            HandleWaypointDelete(i);
+            DrawPoint(i);         
+            HandlePointDrag(i);
+            HandlePointDelete(i);
         }
 
         HandleWaypointAdd();
+        HandleConnectionsDelete();
+        DrawConnections();
     }
 
-    private void HandleWaypointDrag(int i)
+
+    private void DrawConnections()
+    {
+        var laneAuthoring = _lane;
+        if (laneAuthoring.ConnectedLanes == null)
+            return;
+
+        foreach (var connectedLane in laneAuthoring.ConnectedLanes)
+        {
+            if (connectedLane != null && connectedLane.Waypoints.Count > 0)
+            {
+                Vector3 endPoint = laneAuthoring.Waypoints[laneAuthoring.Waypoints.Count - 1];
+                Vector3 connectedStartPoint = connectedLane.Waypoints[0];
+
+                Handles.color = Color.red;
+                Handles.DrawLine(endPoint, connectedStartPoint);
+
+                Handles.Label(connectedStartPoint, $"Connection");
+                Handles.SphereHandleCap(0, connectedStartPoint, Quaternion.identity, 0.5f, EventType.Repaint);
+            }
+        }
+
+    }
+
+    private void HandlePointDrag(int i)
     {
         var currentWaypoint = _lane.Waypoints[i];
 
@@ -44,7 +71,7 @@ public class LaneAuthoringEditor : Editor
         EditorUtility.SetDirty(_lane);
     }
 
-    private void HandleWaypointDelete(int i)
+    private void HandlePointDelete(int i)
     {
         var isRightClick = Event.current.type == EventType.MouseDown && Event.current.button == 1;
         if (!isRightClick || !Event.current.shift)
@@ -60,14 +87,37 @@ public class LaneAuthoringEditor : Editor
         }
     }
 
-    private void Draw(int i)
+    private void HandleConnectionsDelete()
+    {
+        var isRightClick = Event.current.type == EventType.MouseDown && Event.current.button == 1;
+        if (!isRightClick || !Event.current.shift)
+            return;
+
+        for (var i = 0; i < _lane.ConnectedLanes.Count; i++)
+        {  
+            float distanceToConnectionPoint = HandleUtility.DistanceToCircle(_lane.ConnectedLanes[i].Waypoints[0], 0.5f);
+
+            if (distanceToConnectionPoint < 10f) 
+            {
+                Undo.RecordObject(_lane, "Remove Connected Lane");
+
+                _lane.ConnectedLanes.RemoveAt(i);
+                EditorUtility.SetDirty(_lane);
+
+                Event.current.Use(); 
+                break;
+            }
+        }
+    }
+
+    private void DrawPoint(int i)
     {
         var currentWaypoint = _lane.Waypoints[i];
         Handles.color = Color.blue;
         Handles.Label(currentWaypoint, $"Waypoint {i}");
         Handles.SphereHandleCap(0, currentWaypoint, Quaternion.identity, 0.5f, EventType.Repaint);
 
-        if (_lane.Waypoints.Length - i > 1)
+        if (_lane.Waypoints.Count - i > 1)
         {
             Handles.color = Color.yellow;
             Handles.DrawLine(_lane.Waypoints[i], _lane.Waypoints[i + 1]);
@@ -78,6 +128,9 @@ public class LaneAuthoringEditor : Editor
     {
         var leftMouseClick = Event.current.type == EventType.MouseDown && Event.current.button == 0;
         if (!leftMouseClick || !Event.current.shift)
+            return;
+
+        if (TryAddConnection())
             return;
 
         var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -96,25 +149,66 @@ public class LaneAuthoringEditor : Editor
         Event.current.Use();
     }
 
+    private bool TryAddConnection()
+    {
+        GameObject clickedObject = HandleUtility.PickGameObject(Event.current.mousePosition, false);
+        if (clickedObject == null)
+            return false;
+
+        var clickedLane = GetComponentSelfParentOrChildren<LaneAuthoring>(clickedObject);
+        if (clickedLane == null || clickedLane == _lane) 
+        {
+            return false;
+        }
+
+        Undo.RecordObject(_lane, "Add Connected Lane");
+
+        if (!_lane.ConnectedLanes.Contains(clickedLane))
+        {
+            _lane.ConnectedLanes.Add(clickedLane);
+            EditorUtility.SetDirty(_lane);
+        }
+
+        Event.current.Use(); 
+        return true;
+    }
+
     private void AddWaypoint(LaneAuthoring lane, Vector3 position)
     {
-        var waypoints = lane.Waypoints.ToList();
+        var waypoints = lane.Waypoints;
         waypoints.Add(position);
-        lane.Waypoints = waypoints.ToArray();
     }
 
     private void DeleteWaypoint(LaneAuthoring lane, int index)
     {
-         if (lane.Waypoints.Length == 0) 
+         if (lane.Waypoints.Count == 0) 
             return;
 
-         Undo.RecordObject(lane, "Delete Waypoint");
+        Undo.RecordObject(lane, "Delete Waypoint");
 
-        var waypointList = new System.Collections.Generic.List<Vector3>(lane.Waypoints);
-        waypointList.RemoveAt(index);
-        lane.Waypoints = waypointList.ToArray();
-
+        lane.Waypoints.RemoveAt(index);
+        
         EditorUtility.SetDirty(lane);
+    }
+    private static T GetComponentSelfParentOrChildren<T>(GameObject gameObject) where T : Component
+    {
+        // Check on self
+        var component = gameObject.GetComponent<T>();
+        if (component != null)
+            return component;
+
+        // Check on parent
+        component = gameObject.GetComponentInParent<T>();
+        if (component != null)
+            return component;
+
+        // Check on children
+        component = gameObject.GetComponentInChildren<T>();
+        if (component != null)
+            return component;
+
+        // Nothing found
+        return null;
     }
 }
 #endif

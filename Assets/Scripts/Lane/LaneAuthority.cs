@@ -1,9 +1,11 @@
 using UnityEngine;
 using Unity.Entities;
+using System.Collections.Generic;
 
 class LaneAuthoring : MonoBehaviour
 {
-    public Vector3[] Waypoints;
+    public List<Vector3> Waypoints;
+    public List<LaneAuthoring> ConnectedLanes;
 }
 
 class LaneBaker : Baker<LaneAuthoring>
@@ -21,6 +23,14 @@ class LaneBaker : Baker<LaneAuthoring>
         foreach(var waypoint in authoring.Waypoints)
         {
             waypointsBuffer.Add(new Waypoint { Position = waypoint });
+        }
+
+        var lanesConnections = AddBuffer<LaneConnection>(entity);
+        foreach (var lane in authoring.ConnectedLanes)
+        {
+
+            var connectedLaneEntity = GetEntity(lane, TransformUsageFlags.None);
+            lanesConnections.Add(new LaneConnection { ConnectedLane = connectedLaneEntity });
         }
     }
 }

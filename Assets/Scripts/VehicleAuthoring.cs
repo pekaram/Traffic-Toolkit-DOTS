@@ -16,7 +16,7 @@ class VehicleBaker : Baker<VehicleAuthoring>
         AddComponent(entity, new Vehicle
         {
             Speed = authoring.Speed,
-            Lane = GetEntity(authoring.Lane, TransformUsageFlags.None)
+            CurrentLane = GetEntity(authoring.Lane, TransformUsageFlags.None)
         });
     }
 }

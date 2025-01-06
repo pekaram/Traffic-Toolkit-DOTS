@@ -29,10 +29,8 @@ public partial class AdaptiveSpeedSystem : SystemBase
             // Query other vehicles in the same lane
             foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
             {
-
-                if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane && vehicle.ValueRO.NextLane != otherVehicle.ValueRO.CurrentLane)
+                if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane)
                     continue;
-
 
                 float3 otherPosition = otherTransform.ValueRW.Position;
 

@@ -1059,6 +1059,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4116449948518687698, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 437294558}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &553207061 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+  m_PrefabInstance: {fileID: 1413484609141527559}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec3c0c02e7587a4d87360328d9f7a30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &558208137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2059,17 +2070,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4116449948518687698, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 1369821114}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1392517331 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
-  m_PrefabInstance: {fileID: 1413484609141527559}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dec3c0c02e7587a4d87360328d9f7a30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1429984179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3060,6 +3060,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4116449948518687698, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
   m_PrefabInstance: {fileID: 2093353864}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2144091423 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+  m_PrefabInstance: {fileID: 1413484609141527559}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec3c0c02e7587a4d87360328d9f7a30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1413484609141527559
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3148,6 +3159,26 @@ PrefabInstance:
       propertyPath: Waypoints.Array.data[5].z
       value: -0.1951294
       objectReference: {fileID: 0}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: Waypoints.Array.data[6].x
+      value: 532.5301
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: Waypoints.Array.data[6].y
+      value: -0.0000019073486
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: Waypoints.Array.data[6].z
+      value: -492.78256
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: Waypoints.Array.data[7].x
+      value: -57.36728
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: Waypoints.Array.data[7].z
+      value: -683.0233
+      objectReference: {fileID: 0}
     - target: {fileID: 1630467835804426962, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: m_Name
       value: 4 Way
@@ -3202,7 +3233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: ConnectedLanes.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[0].x
@@ -3286,11 +3317,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[8].x
-      value: 4.433155
+      value: 3.3222923
       objectReference: {fileID: 0}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[8].z
-      value: -8.235142
+      value: 25.95453
       objectReference: {fileID: 0}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[9].x
@@ -3335,11 +3366,11 @@ PrefabInstance:
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: 'ConnectedLanes.Array.data[0]'
       value: 
-      objectReference: {fileID: 1392517331}
+      objectReference: {fileID: 2144091423}
     - target: {fileID: 6329626578716970614, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: 'ConnectedLanes.Array.data[1]'
       value: 
-      objectReference: {fileID: 1392517331}
+      objectReference: {fileID: 553207061}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.size
       value: 3

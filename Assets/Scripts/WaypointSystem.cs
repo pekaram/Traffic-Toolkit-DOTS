@@ -33,7 +33,7 @@ public partial struct WaypointSystem : ISystem
 
             if (vehicle.ValueRO.WaypointIndex >= waypoints.Length)
             {
-                TrySwitchLane(vehicle, entity.Index);
+                TrySwitchToNextLane(vehicle);
                 continue;
             }
 
@@ -47,30 +47,14 @@ public partial struct WaypointSystem : ISystem
         }
     }
 
-    private bool TrySwitchLane(RefRW<Vehicle> vehicle, int index)
+    private bool TrySwitchToNextLane(RefRW<Vehicle> vehicle)
     {
-        _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentLane, out var connections);
-        if (connections.Length == 0)
-            return false;
-
-        var random = new Random((uint)index * 100000);
-        var randomIndex = random.NextInt(connections.Length);
-        vehicle.ValueRW.CurrentLane = connections[randomIndex].ConnectedLane;
-        vehicle.ValueRW.WaypointIndex = 0;
-        vehicle.ValueRW.NextLane = Entity.Null;
-
-        return true;
-    }
-
-    //private void FindNextOrNetNextLane()??
-
-    private bool SwitchToNextLane(RefRW<Vehicle> vehicle)
-    {
-        if (vehicle.ValueRW.NextLane == null)
+        if (vehicle.ValueRW.NextLane == Entity.Null)
             return false;
 
         vehicle.ValueRW.CurrentLane = vehicle.ValueRW.NextLane;
         vehicle.ValueRW.WaypointIndex = 0;
+        vehicle.ValueRW.NextLane = Entity.Null;
 
         return true;
     }

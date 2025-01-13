@@ -4,7 +4,7 @@ using Unity.Mathematics;
 public struct Lane : IComponentData
 {
     public float Width;
-    public Entity LaneEntity;
+    public bool IsAvailable;
 }
 
 public struct Waypoint : IBufferElementData

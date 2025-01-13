@@ -16,7 +16,7 @@ class LaneBaker : Baker<LaneAuthoring>
         AddComponent(entity, new Lane
         {
             Width = 0,
-            LaneEntity = entity
+            IsAvailable = true,
         });
 
         var waypointsBuffer = AddBuffer<Waypoint>(entity);
@@ -28,7 +28,6 @@ class LaneBaker : Baker<LaneAuthoring>
         var lanesConnections = AddBuffer<LaneConnection>(entity);
         foreach (var lane in authoring.ConnectedLanes)
         {
-
             var connectedLaneEntity = GetEntity(lane, TransformUsageFlags.None);
             lanesConnections.Add(new LaneConnection { ConnectedLane = connectedLaneEntity });
         }

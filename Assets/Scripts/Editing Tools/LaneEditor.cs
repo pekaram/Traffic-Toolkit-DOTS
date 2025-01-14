@@ -2,9 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
-// 
 [CustomEditor(typeof(LaneAuthoring))]
-public class LaneAuthoringEditor : Editor
+public class LaneEditor : Editor
 {
     private LaneAuthoring _lane;
 
@@ -18,19 +17,32 @@ public class LaneAuthoringEditor : Editor
 
     private void OnSceneGUI()
     {
-        if (_lane == null || _lane.Waypoints == null || _lane.Waypoints.Count == 0)
+        if (_lane == null || _lane.Waypoints == null)
             return;
 
+        Draw();
+        HandleInput();
+    }
+
+    private void Draw()
+    {
         for (var i = 0; i < _lane.Waypoints.Count; i++)
         {
-            DrawPoint(i);         
+            DrawPoint(i);
+        }
+        DrawConnections();
+    }
+
+    private void HandleInput()
+    {
+        for (var i = 0; i < _lane.Waypoints.Count; i++)
+        {
             HandlePointDrag(i);
             HandlePointDelete(i);
         }
 
         HandleWaypointAdd();
         HandleConnectionsDelete();
-        DrawConnections();
     }
 
 
@@ -66,9 +78,10 @@ public class LaneAuthoringEditor : Editor
 
         if (!EditorGUI.EndChangeCheck())
             return;
-
+     
         Undo.RecordObject(_lane, "Move Waypoint");
         _lane.Waypoints[i] = newPosition;
+        Event.current.Use();
     }
 
     private void HandlePointDelete(int i)
@@ -137,11 +150,13 @@ public class LaneAuthoringEditor : Editor
         if (!plane.Raycast(ray, out float distance))
             return;
 
-        var clickPosition = ray.GetPoint(distance);
+       var clickPosition = ray.GetPoint(distance);
         
         Undo.RecordObject(_lane, "Add Waypoint");
-        AddWaypoint(_lane, clickPosition);
+        _lane.Waypoints.Add(clickPosition);
 
+        EditorUtility.SetDirty(_lane);
+       
         Event.current.Use();
     }
 
@@ -152,10 +167,8 @@ public class LaneAuthoringEditor : Editor
             return false;
 
         var clickedLane = GetComponentSelfParentOrChildren<LaneAuthoring>(clickedObject);
-        if (clickedLane == null || clickedLane == _lane) 
-        {
+        if (clickedLane == null || clickedLane == _lane)
             return false;
-        }
 
         Undo.RecordObject(_lane, "Add Connected Lane");
 
@@ -164,15 +177,11 @@ public class LaneAuthoringEditor : Editor
             _lane.ConnectedLanes.Add(clickedLane);
         }
 
+        EditorUtility.SetDirty(_lane);
         Event.current.Use(); 
         return true;
     }
 
-    private void AddWaypoint(LaneAuthoring lane, Vector3 position)
-    {
-        var waypoints = lane.Waypoints;
-        waypoints.Add(position);
-    }
 
     private void DeleteWaypoint(LaneAuthoring lane, int index)
     {
@@ -180,7 +189,6 @@ public class LaneAuthoringEditor : Editor
             return;
 
         Undo.RecordObject(lane, "Delete Waypoint");
-
         lane.Waypoints.RemoveAt(index);
     }
 

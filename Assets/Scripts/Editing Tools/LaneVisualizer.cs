@@ -44,8 +44,8 @@ public class LaneAuthoringEditor : Editor
         {
             if (connectedLane != null && connectedLane.Waypoints.Count > 0)
             {
-                Vector3 endPoint = laneAuthoring.Waypoints[laneAuthoring.Waypoints.Count - 1];
-                Vector3 connectedStartPoint = connectedLane.Waypoints[0];
+                var endPoint = laneAuthoring.Waypoints[laneAuthoring.Waypoints.Count - 1];
+                var connectedStartPoint = connectedLane.Waypoints[0];
 
                 Handles.color = Color.red;
                 Handles.DrawLine(endPoint, connectedStartPoint);
@@ -69,7 +69,6 @@ public class LaneAuthoringEditor : Editor
 
         Undo.RecordObject(_lane, "Move Waypoint");
         _lane.Waypoints[i] = newPosition;
-        EditorUtility.SetDirty(_lane);
     }
 
     private void HandlePointDelete(int i)
@@ -101,9 +100,7 @@ public class LaneAuthoringEditor : Editor
             if (distanceToConnectionPoint < 10f) 
             {
                 Undo.RecordObject(_lane, "Remove Connected Lane");
-
                 _lane.ConnectedLanes.RemoveAt(i);
-                EditorUtility.SetDirty(_lane);
 
                 Event.current.Use(); 
                 break;
@@ -137,7 +134,6 @@ public class LaneAuthoringEditor : Editor
         var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         var plane = new Plane(Vector3.up, Vector3.zero);
 
-        // Find the intersection point
         if (!plane.Raycast(ray, out float distance))
             return;
 
@@ -145,7 +141,6 @@ public class LaneAuthoringEditor : Editor
         
         Undo.RecordObject(_lane, "Add Waypoint");
         AddWaypoint(_lane, clickPosition);
-        EditorUtility.SetDirty(_lane);
 
         Event.current.Use();
     }
@@ -167,7 +162,6 @@ public class LaneAuthoringEditor : Editor
         if (!_lane.ConnectedLanes.Contains(clickedLane))
         {
             _lane.ConnectedLanes.Add(clickedLane);
-            EditorUtility.SetDirty(_lane);
         }
 
         Event.current.Use(); 
@@ -188,9 +182,8 @@ public class LaneAuthoringEditor : Editor
         Undo.RecordObject(lane, "Delete Waypoint");
 
         lane.Waypoints.RemoveAt(index);
-        
-        EditorUtility.SetDirty(lane);
     }
+
     private static T GetComponentSelfParentOrChildren<T>(GameObject gameObject) where T : Component
     {
         // Check on self

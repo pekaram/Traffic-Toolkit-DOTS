@@ -30,9 +30,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3973432118082424006}
+  - {fileID: 1349891040625449522}
   - {fileID: 1663992914765711729}
   - {fileID: 8472336258079327826}
-  - {fileID: 1349891040625449522}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3462065932691992626
@@ -45,7 +45,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_Name
-      value: '2LaneRoad (X) '
+      value: Street 4
       objectReference: {fileID: 0}
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_IsActive
@@ -115,7 +115,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_Name
-      value: '2LaneRoad (-Z)  '
+      value: Street 3
       objectReference: {fileID: 0}
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_IsActive
@@ -185,7 +185,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_Name
-      value: 2LaneRoad (-X)
+      value: Street 2
       objectReference: {fileID: 0}
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_IsActive
@@ -255,7 +255,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_Name
-      value: '2LaneRoad (Z) '
+      value: Street 1
       objectReference: {fileID: 0}
     - target: {fileID: 104939002292220964, guid: 3e98524b4a9b5734dbca3833deaf5642, type: 3}
       propertyPath: m_IsActive

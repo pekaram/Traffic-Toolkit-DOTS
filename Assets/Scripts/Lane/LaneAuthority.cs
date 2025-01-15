@@ -1,22 +1,31 @@
 using UnityEngine;
 using Unity.Entities;
 using System.Collections.Generic;
+using System.Linq;
 
-class LaneAuthoring : MonoBehaviour
+public class LaneAuthoring : MonoBehaviour
 {
     public List<Vector3> Waypoints;
     public List<LaneAuthoring> ConnectedLanes;
 }
 
-class LaneBaker : Baker<LaneAuthoring>
+public class LaneBaker : Baker<LaneAuthoring>
 {
     public override void Bake(LaneAuthoring authoring)
     {
         var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+        var TrafficLight = Object.FindObjectsByType<TrafficLightAuthoring>(FindObjectsSortMode.None).Where(p => p.Lane == authoring).FirstOrDefault();
+        var trafficLightEntity = Entity.Null;
+        if (TrafficLight != null)
+        {
+            trafficLightEntity = GetEntity(TrafficLight, TransformUsageFlags.None);
+        }
+
         AddComponent(entity, new Lane
         {
             Width = 0,
-            IsAvailable = true,
+            AssociatedTrafficLight = trafficLightEntity
         });
 
         var waypointsBuffer = AddBuffer<Waypoint>(entity);

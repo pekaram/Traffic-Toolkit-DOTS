@@ -4,7 +4,7 @@ using Unity.Entities;
 
 public class TrafficLightAuthoring : MonoBehaviour
 {
-    public GameObject Lane;
+    public LaneAuthoring Lane;
 }
 
 public class TrafficLightBaker : Baker<TrafficLightAuthoring>

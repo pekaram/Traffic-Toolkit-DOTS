@@ -5,6 +5,7 @@ public struct Lane : IComponentData
 {
     public float Width;
     public bool IsAvailable;
+    public Entity AssociatedTrafficLight;
 }
 
 public struct Waypoint : IBufferElementData

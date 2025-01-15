@@ -20,7 +20,7 @@ public partial struct WaypointSystem : ISystem
     {
         _waypointLookup.Update(ref state);
         _connectionLookup.Update(ref state);
-        foreach (var (vehicle, transform, entity) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>().WithEntityAccess())
+        foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
             if (vehicle.ValueRW.CurrentLane == Entity.Null)
                 continue;
@@ -41,9 +41,19 @@ public partial struct WaypointSystem : ISystem
             if (math.distance(waypoints[vehicle.ValueRO.WaypointIndex].Position, transform.ValueRO.Position) > 10)
                 continue;
 
-            // Reached the current waypoint, move to the next one
             vehicle.ValueRW.WaypointIndex++;
         }
+    }
+
+    private bool CanSwitchLane(RefRW<Vehicle> vehicle, ref SystemState state)
+    {
+        var lane = SystemAPI.GetComponent<Lane>(vehicle.ValueRO.CurrentLane);
+
+        if (lane.AssociatedTrafficLight == Entity.Null)
+            return true;
+
+        var trafficLight = SystemAPI.GetComponent<TrafficLight>(lane.AssociatedTrafficLight);
+        return trafficLight.CurrentState == 1;
     }
 
     private bool TrySwitchToNextLane(RefRW<Vehicle> vehicle, ref SystemState state)
@@ -51,12 +61,8 @@ public partial struct WaypointSystem : ISystem
         if (vehicle.ValueRO.NextLane == Entity.Null)
             return false;
 
-        var lane = SystemAPI.GetComponent<Lane>(vehicle.ValueRO.NextLane);
-        if (!lane.IsAvailable)
-        {
-           // UnityEngine.Debug.LogError("A vehicle Stopped at traffic light a lane index" + vehicle.ValueRO.NextLane.Index);
+        if (!CanSwitchLane(vehicle, ref state))
             return false;
-        }
    
         vehicle.ValueRW.CurrentLane = vehicle.ValueRW.NextLane;
         vehicle.ValueRW.WaypointIndex = 0;

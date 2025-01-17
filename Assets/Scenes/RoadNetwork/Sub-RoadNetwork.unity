@@ -302,9 +302,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1680217821}
     m_Modifications:
+    - target: {fileID: 3014039050649117883, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3582527733471082853, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_Name
       value: Traffic Light 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7258518942213300428, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
@@ -312,7 +320,7 @@ PrefabInstance:
       objectReference: {fileID: 1413484609141527565}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2
+      value: 6.63
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.y
@@ -320,7 +328,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 90.000015
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1144,9 +1152,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1304347187}
     m_Modifications:
+    - target: {fileID: 3014039050649117883, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3582527733471082853, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_Name
       value: Traffic Light 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7258518942213300428, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
@@ -1154,7 +1170,7 @@ PrefabInstance:
       objectReference: {fileID: 553207061}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15
+      value: -6
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1162,7 +1178,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3018,9 +3034,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2144091424}
     m_Modifications:
+    - target: {fileID: 3014039050649117883, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3582527733471082853, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_Name
       value: Traffic Light 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7258518942213300428, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
@@ -3028,7 +3052,7 @@ PrefabInstance:
       objectReference: {fileID: 2144091423}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -14.1
+      value: -6
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3036,7 +3060,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4144,9 +4168,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1413484609141527567}
     m_Modifications:
+    - target: {fileID: 3014039050649117883, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3582527733471082853, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_Name
       value: Traffic Light 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3582527733471082853, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7258518942213300428, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
@@ -4154,7 +4190,7 @@ PrefabInstance:
       objectReference: {fileID: 1413484609141527564}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: m_LocalPosition.y

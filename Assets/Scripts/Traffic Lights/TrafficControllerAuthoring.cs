@@ -7,7 +7,7 @@ using UnityEngine;
 public class TrafficControllerAuthoring : MonoBehaviour
 {
     public List<TrafficLightAuthoring> ControlledTrafficLights;
-    public float CycleTime; 
+    public float CycleTime;
 }
 
 public class TrafficControllerBaker : Baker<TrafficControllerAuthoring>

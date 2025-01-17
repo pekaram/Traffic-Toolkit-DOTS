@@ -5,6 +5,14 @@ using Unity.Entities;
 public class TrafficLightAuthoring : MonoBehaviour
 {
     public LaneAuthoring Lane;
+
+    public void OnValidate()
+    {
+        if (!Lane)
+            return;
+
+        Lane.TrafficLight = this;
+    }
 }
 
 public class TrafficLightBaker : Baker<TrafficLightAuthoring>

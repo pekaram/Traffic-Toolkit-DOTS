@@ -7,6 +7,7 @@ public class LaneAuthoring : MonoBehaviour
 {
     public List<Vector3> Waypoints;
     public List<LaneAuthoring> ConnectedLanes;
+    public TrafficLightAuthoring TrafficLight { get; set; }
 }
 
 public class LaneBaker : Baker<LaneAuthoring>
@@ -15,11 +16,10 @@ public class LaneBaker : Baker<LaneAuthoring>
     {
         var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-        var TrafficLight = Object.FindObjectsByType<TrafficLightAuthoring>(FindObjectsSortMode.None).Where(p => p.Lane == authoring).FirstOrDefault();
         var trafficLightEntity = Entity.Null;
-        if (TrafficLight != null)
+        if (authoring.TrafficLight != null)
         {
-            trafficLightEntity = GetEntity(TrafficLight, TransformUsageFlags.None);
+            trafficLightEntity = GetEntity(authoring.TrafficLight, TransformUsageFlags.None);
         }
 
         AddComponent(entity, new Lane

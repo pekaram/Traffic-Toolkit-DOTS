@@ -31,6 +31,11 @@ public class LaneEditor : Editor
             DrawPoint(i);
         }
         DrawConnections();
+
+        if (_lane.TrafficLight)
+        {
+           TrafficLightEditor.Visualize(_lane.TrafficLight);
+        }
     }
 
     private void HandleInput()
@@ -56,12 +61,11 @@ public class LaneEditor : Editor
         {
             if (connectedLane != null && connectedLane.Waypoints.Count > 0)
             {
-                var endPoint = laneAuthoring.Waypoints[laneAuthoring.Waypoints.Count - 1];
+                var endPoint = laneAuthoring.Waypoints[^1];
                 var connectedStartPoint = connectedLane.Waypoints[0];
 
-                Handles.color = Color.red;
-                Handles.DrawLine(endPoint, connectedStartPoint);
-
+                Handles.color = Color.yellow;
+                Handles.DrawDottedLine(endPoint, connectedStartPoint, 10);
                 Handles.Label(connectedStartPoint, $"Connection");
                 Handles.SphereHandleCap(0, connectedStartPoint, Quaternion.identity, 0.5f, EventType.Repaint);
             }
@@ -130,7 +134,7 @@ public class LaneEditor : Editor
 
         if (_lane.Waypoints.Count - i > 1)
         {
-            Handles.color = Color.yellow;
+            Handles.color = Color.green;
             Handles.DrawLine(_lane.Waypoints[i], _lane.Waypoints[i + 1]);
         }
     }

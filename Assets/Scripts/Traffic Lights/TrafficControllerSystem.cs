@@ -24,8 +24,8 @@ public partial struct TrafficControllerSystem : ISystem
 
             controller.ValueRW.ElapsedTime += deltaTime;
 
-            float phaseDuration = controller.ValueRO.CycleTime / lightsBuffer.Length;
-            int currentPhase = (int)(controller.ValueRW.ElapsedTime / phaseDuration) % lightsBuffer.Length;
+            var phaseDuration = controller.ValueRO.CycleTime / lightsBuffer.Length;
+            var currentPhase = (int)(controller.ValueRW.ElapsedTime / phaseDuration) % lightsBuffer.Length;
 
             for (int i = 0; i < lightsBuffer.Length; i++)
             {

@@ -1,4 +1,3 @@
-using Unity.Collections;
 using Unity.Entities;
 
 public struct TrafficController : IComponentData
@@ -11,9 +10,7 @@ public struct ControlledTrafficLight : IBufferElementData
 {
     public Entity Entity;
 
-    // Option A
     public int CurrentState;
 
-    // Can this be a list?
     public Entity AssociatedLane;
 }

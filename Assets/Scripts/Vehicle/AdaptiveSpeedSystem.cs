@@ -1,67 +1,69 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using Unity.VisualScripting;
 
-public partial class AdaptiveSpeedSystem : SystemBase
+public partial struct AdaptiveSpeedSystem : ISystem
 {
-    protected override void OnUpdate()
-    {
-        float deltaTime = SystemAPI.Time.DeltaTime;
+    private const float IdealSpeed = 20;
 
-        // Query all vehicles and their associated transforms
+    private const float BrakingPower = 5;
+
+    private const float AcceleratingPower = 1;
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
-            //Ensure the vehicle has a valid LaneEntity
             if (vehicle.ValueRW.CurrentLane == Entity.Null)
                 continue;
 
-            if (math.distance(vehicle.ValueRO.WaypointPosition, transform.ValueRO.Position) < 4)
+            var arrivedToTargetPoint = math.distance(vehicle.ValueRO.WaypointPosition, transform.ValueRO.Position) < 4;
+            if (arrivedToTargetPoint)
             {
                 vehicle.ValueRW.Speed = 0;
+                continue;
             }
 
-            float3 currentPosition = transform.ValueRW.Position;
-            var vehicleMoveDirection = math.normalize(vehicle.ValueRO.WaypointPosition - currentPosition);
-
-            // Initialize adaptive speed
-            var adjustedSpeed = vehicle.ValueRW.Speed;
-
-            // Query other vehicles in the same lane
-            foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
+            var isFrontalSensorOn = IsFrontalSensorOn(ref state, transform, vehicle);
+            var currentSpeed = vehicle.ValueRO.Speed;
+            if (isFrontalSensorOn)
             {
-                if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane)
-                    continue;
-
-                float3 otherPosition = otherTransform.ValueRW.Position;
-
-                // Check if the other vehicle is ahead 
-                float3 distanceToOtherVehicle = otherPosition - currentPosition;
-                var directiontoOtherVehicle = math.normalize(distanceToOtherVehicle);
-
-                float distanceAlongLane = math.dot(distanceToOtherVehicle, vehicleMoveDirection);
-                if (distanceAlongLane > 0
-                    && distanceAlongLane < 10)
-                {
-                     // Slow down to maintain safe following distance
-                    adjustedSpeed = otherVehicle.ValueRO.Speed;
-                }
+                vehicle.ValueRW.Speed = currentSpeed <= 0 ? 0 : currentSpeed - BrakingPower;
+                continue;
             }
+
+            if (vehicle.ValueRO.Speed >= IdealSpeed)
+                continue;
 
             // Update the vehicle's current speed
-            vehicle.ValueRW.Speed = adjustedSpeed;
+            vehicle.ValueRW.Speed += AcceleratingPower;
+        }
+    }
 
-            // Move the vehicle forward at the adjusted speed
-            transform.ValueRW.Position += transform.ValueRO.Forward() * adjustedSpeed * deltaTime;
+    private bool IsFrontalSensorOn(ref SystemState state, RefRW<LocalTransform> transform, RefRW<Vehicle> vehicle)
+    {
+        var currentPosition = transform.ValueRW.Position;
+        var vehicleMoveDirection = math.normalize(vehicle.ValueRO.WaypointPosition - currentPosition);
 
-            // Update the Rotation component directly
-            if (math.lengthsq(vehicleMoveDirection) > 0.005f && adjustedSpeed > 0) // Avoid division by zero
+        foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
+        {
+            if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane)
+                continue;
+
+            var otherPosition = otherTransform.ValueRW.Position;
+
+            var distanceToOtherVehicle = otherPosition - currentPosition;
+
+            var distanceAlongLane = math.dot(distanceToOtherVehicle, vehicleMoveDirection);
+            if (distanceAlongLane > 0 && distanceAlongLane < 12)
             {
-                var targetRotation = quaternion.LookRotationSafe(vehicleMoveDirection, math.up());
-                //transform.ValueRW.Rotation = targetRotation;
-                transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 5); // Smooth rotation
+                return true;
             }
-
         }
 
+        return false;
     }
 }

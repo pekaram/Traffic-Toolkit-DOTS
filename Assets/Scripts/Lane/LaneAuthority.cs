@@ -31,7 +31,7 @@ public class LaneBaker : Baker<LaneAuthoring>
         var waypointsBuffer = AddBuffer<Waypoint>(entity);
         foreach(var waypoint in authoring.Waypoints)
         {
-            waypointsBuffer.Add(new Waypoint { Position = waypoint });
+            waypointsBuffer.Add(new Waypoint { Position = authoring.transform.TransformPoint(waypoint) });
         }
 
         var lanesConnections = AddBuffer<LaneConnection>(entity);

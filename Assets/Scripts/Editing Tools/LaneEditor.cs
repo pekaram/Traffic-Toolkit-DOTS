@@ -9,10 +9,7 @@ public class LaneEditor : Editor
 
     private void OnEnable()
     {
-        if (Selection.activeGameObject != null)
-        {
-            _lane = Selection.activeGameObject.GetComponent<LaneAuthoring>();
-        }
+        _lane = (LaneAuthoring)target;
     }
 
     private void OnSceneGUI()
@@ -29,8 +26,10 @@ public class LaneEditor : Editor
         for (var i = 0; i < _lane.Waypoints.Count; i++)
         {
             DrawPoint(i);
+            DrawPointConnection(i);
         }
-        DrawConnections();
+        
+        DrawLaneConnections();
 
         if (_lane.TrafficLight)
         {
@@ -47,44 +46,42 @@ public class LaneEditor : Editor
         }
 
         HandleWaypointAdd();
-        HandleConnectionsDelete();
+        HandleLaneConnectionDelete();
     }
 
-
-    private void DrawConnections()
+    private void DrawLaneConnections()
     {
-        var laneAuthoring = _lane;
-        if (laneAuthoring.ConnectedLanes == null)
+       if (_lane.ConnectedLanes == null)
             return;
 
-        foreach (var connectedLane in laneAuthoring.ConnectedLanes)
+        for (var i = 0; i < _lane.ConnectedLanes.Count; i++)
         {
-            if (connectedLane != null && connectedLane.Waypoints.Count > 0)
-            {
-                var endPoint = laneAuthoring.Waypoints[^1];
-                var connectedStartPoint = connectedLane.Waypoints[0];
+            var nextLane = _lane.ConnectedLanes[i];
+            if (nextLane == null || nextLane.Waypoints.Count == 0)
+                continue;
 
-                Handles.color = Color.yellow;
-                Handles.DrawDottedLine(endPoint, connectedStartPoint, 10);
-                Handles.Label(connectedStartPoint, $"Connection");
-                Handles.SphereHandleCap(0, connectedStartPoint, Quaternion.identity, 0.5f, EventType.Repaint);
-            }
-        }
+            Handles.color = Color.yellow;
+            var from = TransformPoint(_lane.Waypoints[^1]);
+            var to = nextLane.transform.TransformPoint(nextLane.Waypoints[0]);
+            Handles.DrawDottedLine(from, to, 10);
 
+            Handles.Label(to, $"Connection {i}");
+            Handles.SphereHandleCap(0, to, Quaternion.identity, 0.5f, EventType.Repaint);
+        } 
     }
 
     private void HandlePointDrag(int i)
     {
-        var currentWaypoint = _lane.Waypoints[i];
-
         EditorGUI.BeginChangeCheck();
-        Vector3 newPosition = Handles.PositionHandle(currentWaypoint, Quaternion.identity);
 
+        var currentWaypoint = _lane.Waypoints[i];
+        var worldPosition = Handles.PositionHandle(TransformPoint(currentWaypoint), Quaternion.identity);
+ 
         if (!EditorGUI.EndChangeCheck())
             return;
-     
+ 
         Undo.RecordObject(_lane, "Move Waypoint");
-        _lane.Waypoints[i] = newPosition;
+        _lane.Waypoints[i] = InverseTransformPoint(worldPosition);
         Event.current.Use();
     }
 
@@ -94,7 +91,7 @@ public class LaneEditor : Editor
         if (!isRightClick || !Event.current.shift)
             return;
 
-        var currentWaypoint = _lane.Waypoints[i];
+        var currentWaypoint = TransformPoint(_lane.Waypoints[i]);
         var distance = HandleUtility.DistanceToCircle(currentWaypoint, 0.5f);
 
         if (distance < 1f)
@@ -104,15 +101,17 @@ public class LaneEditor : Editor
         }
     }
 
-    private void HandleConnectionsDelete()
+    private void HandleLaneConnectionDelete()
     {
         var isRightClick = Event.current.type == EventType.MouseDown && Event.current.button == 1;
         if (!isRightClick || !Event.current.shift)
             return;
 
         for (var i = 0; i < _lane.ConnectedLanes.Count; i++)
-        {  
-            float distanceToConnectionPoint = HandleUtility.DistanceToCircle(_lane.ConnectedLanes[i].Waypoints[0], 0.5f);
+        {
+            var localConnectionPoint = _lane.ConnectedLanes[i].Waypoints[0];
+            var worldConnectionPoint = _lane.ConnectedLanes[i].transform.TransformPoint(localConnectionPoint);
+            float distanceToConnectionPoint = HandleUtility.DistanceToCircle(worldConnectionPoint, 0.5f);
 
             if (distanceToConnectionPoint < 10f) 
             {
@@ -127,15 +126,18 @@ public class LaneEditor : Editor
 
     private void DrawPoint(int i)
     {
-        var currentWaypoint = _lane.Waypoints[i];
+        var currentWaypoint = TransformPoint(_lane.Waypoints[i]);
         Handles.color = Color.blue;
         Handles.Label(currentWaypoint, $"Waypoint {i}");
         Handles.SphereHandleCap(0, currentWaypoint, Quaternion.identity, 0.5f, EventType.Repaint);
+    }
 
+    private void DrawPointConnection(int i)
+    {
         if (_lane.Waypoints.Count - i > 1)
         {
             Handles.color = Color.green;
-            Handles.DrawLine(_lane.Waypoints[i], _lane.Waypoints[i + 1]);
+            Handles.DrawLine(TransformPoint(_lane.Waypoints[i]), TransformPoint(_lane.Waypoints[i + 1]));
         }
     }
 
@@ -157,16 +159,16 @@ public class LaneEditor : Editor
        var clickPosition = ray.GetPoint(distance);
         
         Undo.RecordObject(_lane, "Add Waypoint");
-        _lane.Waypoints.Add(clickPosition);
+        var localPosition = InverseTransformPoint(clickPosition);
+        _lane.Waypoints.Add(localPosition);
 
-        EditorUtility.SetDirty(_lane);
-       
+        EditorUtility.SetDirty(_lane);    
         Event.current.Use();
     }
 
     private bool TryAddConnection()
     {
-        GameObject clickedObject = HandleUtility.PickGameObject(Event.current.mousePosition, false);
+        var clickedObject = HandleUtility.PickGameObject(Event.current.mousePosition, false);
         if (clickedObject == null)
             return false;
 
@@ -194,6 +196,16 @@ public class LaneEditor : Editor
 
         Undo.RecordObject(lane, "Delete Waypoint");
         lane.Waypoints.RemoveAt(index);
+    }
+
+    private Vector3 TransformPoint(Vector3 localPosition)
+    {
+        return _lane.transform.TransformPoint(localPosition);
+    }
+
+    private Vector3 InverseTransformPoint(Vector3 worldPosition)
+    {
+        return _lane.transform.InverseTransformPoint(worldPosition);
     }
 
     private static T GetComponentSelfParentOrChildren<T>(GameObject gameObject) where T : Component

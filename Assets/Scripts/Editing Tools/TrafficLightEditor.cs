@@ -17,7 +17,7 @@ public class TrafficLightEditor : Editor
     {
         Visualize(_trafficLight);
 
-        if (_trafficLight.Lane.Waypoints == null || _trafficLight.Lane.Waypoints.Count < 1)
+        if (_trafficLight.Lane?.Waypoints == null || _trafficLight.Lane.Waypoints.Count < 1)
             return;
 
         Handles.color = Color.red;

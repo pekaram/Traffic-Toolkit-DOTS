@@ -1,17 +1,17 @@
 using UnityEngine;
 using Unity.Entities;
-
+using System.Collections.Generic;
 
 public class TrafficLightAuthoring : MonoBehaviour
 {
-    public LaneAuthoring Lane;
+    public List<LaneAuthoring> Lanes = new();
 
     public void OnValidate()
     {
-        if (!Lane)
-            return;
-
-        Lane.TrafficLight = this;
+        foreach(var lane in Lanes)
+        {
+            lane.TrafficLight = this;
+        }
     }
 }
 
@@ -19,10 +19,7 @@ public class TrafficLightBaker : Baker<TrafficLightAuthoring>
 {
     public override void Bake(TrafficLightAuthoring authoring)
     {
-        var entity = GetEntity(TransformUsageFlags.Dynamic);
-        AddComponent(entity, new TrafficLight
-        {
-            AssociatedLane = GetEntity(authoring.Lane, TransformUsageFlags.None)
-        });
+        var entity = GetEntity(TransformUsageFlags.None);
+        AddComponent(entity, new TrafficLight());
     }
 }

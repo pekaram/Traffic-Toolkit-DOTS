@@ -117,7 +117,7 @@ public class LaneEditor : Editor
             {
                 Undo.RecordObject(_lane, "Remove Connected Lane");
                 _lane.ConnectedLanes.RemoveAt(i);
-
+                EditorUtility.SetDirty(_lane);
                 Event.current.Use(); 
                 break;
             }

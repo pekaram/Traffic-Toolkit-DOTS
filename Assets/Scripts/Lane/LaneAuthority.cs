@@ -7,7 +7,7 @@ public class LaneAuthoring : MonoBehaviour
 {
     public List<Vector3> Waypoints = new();
 
-    public List<LaneAuthoring> ConnectedLanes= new();
+    public List<LaneAuthoring> ConnectedLanes = new();
 
     public TrafficLightAuthoring TrafficLight { get; set; }
 }

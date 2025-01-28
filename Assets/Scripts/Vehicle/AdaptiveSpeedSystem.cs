@@ -1,69 +1,62 @@
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Aspects;
 using Unity.Transforms;
-using Unity.VisualScripting;
 
 public partial struct AdaptiveSpeedSystem : ISystem
 {
     private const float IdealSpeed = 20;
 
-    private const float BrakingPower = 5;
+    private const float BrakingPower = 100;
 
-    private const float AcceleratingPower = 1;
+    private const float AcceleratingPower = 100;
+
+    private const float CollisionDetectionDistance = 20;
+
+    private const float MinimumSpeed = 0;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
+        var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+        var deltaTime = SystemAPI.Time.DeltaTime;
+
+        foreach (var (vehicle, transform, entity) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>().WithEntityAccess())
         {
             if (vehicle.ValueRW.CurrentLane == Entity.Null)
                 continue;
 
-            var arrivedToTargetPoint = math.distance(vehicle.ValueRO.WaypointPosition, transform.ValueRO.Position) < 4;
-            if (arrivedToTargetPoint)
+            if (vehicle.ValueRO.RemainingWaypoints == 0)
             {
-                vehicle.ValueRW.Speed = 0;
+                Brake(vehicle, BrakingPower * deltaTime);
                 continue;
             }
 
-            var isFrontalSensorOn = IsFrontalSensorOn(ref state, transform, vehicle);
-            var currentSpeed = vehicle.ValueRO.Speed;
-            if (isFrontalSensorOn)
+            var colliderAspect = SystemAPI.GetAspect<ColliderAspect>(entity);    
+            if (physicsWorld.CastCollider(in colliderAspect, transform.ValueRO.Forward(), CollisionDetectionDistance, out var hit))
             {
-                vehicle.ValueRW.Speed = currentSpeed <= 0 ? 0 : currentSpeed - BrakingPower;
-                continue;
+                if (SystemAPI.HasComponent<Vehicle>(hit.Entity))
+                {
+                    Brake(vehicle, BrakingPower * deltaTime);
+                    continue;
+                }
             }
 
-            if (vehicle.ValueRO.Speed >= IdealSpeed)
-                continue;
-
-            // Update the vehicle's current speed
-            vehicle.ValueRW.Speed += AcceleratingPower;
+            Accelerate(vehicle, AcceleratingPower * deltaTime);
         }
     }
 
-    private bool IsFrontalSensorOn(ref SystemState state, RefRW<LocalTransform> transform, RefRW<Vehicle> vehicle)
+    private void Brake(RefRW<Vehicle> vehicle, float brakePower)
     {
-        var currentPosition = transform.ValueRW.Position;
-        var vehicleMoveDirection = math.normalize(vehicle.ValueRO.WaypointPosition - currentPosition);
+        vehicle.ValueRW.Speed = vehicle.ValueRW.Speed <= MinimumSpeed ? MinimumSpeed : vehicle.ValueRW.Speed - brakePower;
+    }
 
-        foreach (var (otherVehicle, otherTransform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
-        {
-            if (vehicle.ValueRO.CurrentLane != otherVehicle.ValueRO.CurrentLane)
-                continue;
+    private void Accelerate(RefRW<Vehicle> vehicle, float acceleratePower)
+    {
+        if (vehicle.ValueRO.Speed >= IdealSpeed)
+            return;
 
-            var otherPosition = otherTransform.ValueRW.Position;
-
-            var distanceToOtherVehicle = otherPosition - currentPosition;
-
-            var distanceAlongLane = math.dot(distanceToOtherVehicle, vehicleMoveDirection);
-            if (distanceAlongLane > 0 && distanceAlongLane < 12)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        vehicle.ValueRW.Speed += acceleratePower;
     }
 }

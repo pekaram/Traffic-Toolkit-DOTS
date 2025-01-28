@@ -985,6 +985,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4116449948518687698}
   - component: {fileID: 5072145768318847166}
+  - component: {fileID: 7820847373084169599}
   m_Layer: 0
   m_Name: Traffic Car
   m_TagString: Untagged
@@ -1022,6 +1023,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Speed: 20
   Lane: {fileID: 0}
+--- !u!136 &7820847373084169599
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4367912832611735569}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2.04
+  m_Height: 9.27
+  m_Direction: 2
+  m_Center: {x: 0, y: 1.11, z: 0}
 --- !u!1 &5526818515536064863
 GameObject:
   m_ObjectHideFlags: 0

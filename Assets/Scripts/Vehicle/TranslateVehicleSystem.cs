@@ -14,15 +14,13 @@ public partial struct TranslateVehicleSystem : ISystem
             var speed = vehicle.ValueRO.Speed;
             var direction = math.normalize(vehicle.ValueRO.WaypointPosition - transform.ValueRO.Position);
 
-            // Move the vehicle forward at the adjusted speed
             transform.ValueRW.Position += transform.ValueRO.Forward() * speed * deltaTime;
 
             if (speed <= 0)
                 continue;
 
             var targetRotation = quaternion.LookRotationSafe(direction, math.up());
-            //transform.ValueRW.Rotation = targetRotation;
-            transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 5); // Smooth rotation
+            transform.ValueRW.Rotation = math.slerp(transform.ValueRW.Rotation, targetRotation, deltaTime * 2.5f); 
         }
     }
 }

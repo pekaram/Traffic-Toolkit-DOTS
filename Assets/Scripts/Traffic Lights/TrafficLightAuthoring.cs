@@ -8,7 +8,7 @@ public class TrafficLightAuthoring : MonoBehaviour
 
     public void OnValidate()
     {
-        foreach(var lane in Lanes)
+        foreach (var lane in Lanes)
         {
             lane.TrafficLight = this;
         }

@@ -7,25 +7,23 @@ public partial struct WaypointSystem : ISystem
 {
     private BufferLookup<Waypoint> _waypointLookup;
 
-    private BufferLookup<LaneConnection> _connectionLookup;
-
     public void OnCreate(ref SystemState state)
     {
         _waypointLookup = state.GetBufferLookup<Waypoint>(true);
-        _connectionLookup = state.GetBufferLookup<LaneConnection>(true);
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         _waypointLookup.Update(ref state);
-        _connectionLookup.Update(ref state);
         foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
             if (vehicle.ValueRW.CurrentLane == Entity.Null)
                 continue;
 
             _waypointLookup.TryGetBuffer(vehicle.ValueRO.CurrentLane, out var waypoints);
+
+            vehicle.ValueRW.RemainingWaypoints = waypoints.Length - vehicle.ValueRW.WaypointIndex;
 
             if (waypoints.Length == 0)
                 continue;
@@ -63,7 +61,7 @@ public partial struct WaypointSystem : ISystem
 
         if (!CanSwitchLane(vehicle, ref state))
             return false;
-   
+
         vehicle.ValueRW.CurrentLane = vehicle.ValueRW.NextLane;
         vehicle.ValueRW.WaypointIndex = 0;
         vehicle.ValueRW.NextLane = Entity.Null;

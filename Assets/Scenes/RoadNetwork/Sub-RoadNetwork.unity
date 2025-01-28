@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 27077902}
   - component: {fileID: 27077905}
   - component: {fileID: 27077904}
-  - component: {fileID: 27077903}
   m_Layer: 0
   m_Name: Intersection
   m_TagString: Untagged
@@ -154,28 +153,6 @@ Transform:
   - {fileID: 1065363186}
   m_Father: {fileID: 1413484609141527560}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &27077903
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 27077901}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &27077904
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1182,6 +1159,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
+      value: 
+      objectReference: {fileID: 553207061}
+    - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: Lanes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: 'Lanes.Array.data[0]'
       value: 
       objectReference: {fileID: 553207061}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
@@ -3595,7 +3580,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1337080879443376084, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[10].y
-      value: -0.6223755
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1337080879443376084, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[10].z
@@ -4075,7 +4060,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: ConnectedLanes.Array.size
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.data[0].x
@@ -4116,11 +4101,11 @@ PrefabInstance:
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: 'ConnectedLanes.Array.data[0]'
       value: 
-      objectReference: {fileID: 1413484609141527561}
+      objectReference: {fileID: 1071790946}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: 'ConnectedLanes.Array.data[1]'
       value: 
-      objectReference: {fileID: 1071790946}
+      objectReference: {fileID: 1413484609141527561}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: 'ConnectedLanes.Array.data[2]'
       value: 
@@ -4234,6 +4219,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
       propertyPath: Lane
+      value: 
+      objectReference: {fileID: 1413484609141527564}
+    - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: Lanes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7599980310407587247, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
+      propertyPath: 'Lanes.Array.data[0]'
       value: 
       objectReference: {fileID: 1413484609141527564}
     - target: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}

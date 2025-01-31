@@ -1770,7 +1770,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6964029251774125289, guid: 4f870d3b604be8f4a94c06e524c0733a, type: 3}
       propertyPath: CycleTime
-      value: 10
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6964029251774125289, guid: 4f870d3b604be8f4a94c06e524c0733a, type: 3}
+      propertyPath: YellowPercentage
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6964029251774125289, guid: 4f870d3b604be8f4a94c06e524c0733a, type: 3}
+      propertyPath: YellowSignalPercentage
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 6964029251774125289, guid: 4f870d3b604be8f4a94c06e524c0733a, type: 3}
       propertyPath: ControlledTrafficLights.Array.size

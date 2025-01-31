@@ -51,7 +51,7 @@ public partial struct WaypointSystem : ISystem
             return true;
 
         var trafficLight = SystemAPI.GetComponent<TrafficLight>(lane.AssociatedTrafficLight);
-        return trafficLight.CurrentState == 1;
+        return trafficLight.Signal == TrafficLightSignal.Green;
     }
 
     private bool TrySwitchToNextLane(RefRW<Vehicle> vehicle, ref SystemState state)

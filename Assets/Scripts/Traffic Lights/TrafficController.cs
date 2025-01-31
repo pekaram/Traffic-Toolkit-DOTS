@@ -2,8 +2,9 @@ using Unity.Entities;
 
 public struct TrafficController : IComponentData
 {
-    public float CycleTime; // Time for one full cycle (e.g., 60 seconds)
-    public float ElapsedTime; // Time elapsed in the current cycle
+    public float CycleTime; 
+    public float ElapsedTime; 
+    public float YellowSignalPercentage;
 }
 
 public struct ControlledTrafficLight : IBufferElementData

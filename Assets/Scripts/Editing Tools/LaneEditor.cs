@@ -151,7 +151,8 @@ public class LaneEditor : Editor
             return;
 
         var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-        var plane = new Plane(Vector3.up, Vector3.zero);
+        // TODO: [MTS-28] temporary workaround, revisit with elevation support
+        var plane = new Plane(_lane.transform.up, Vector3.zero);
 
         if (!plane.Raycast(ray, out float distance))
             return;
@@ -205,7 +206,9 @@ public class LaneEditor : Editor
 
     private Vector3 InverseTransformPoint(Vector3 worldPosition)
     {
-        return _lane.transform.InverseTransformPoint(worldPosition);
+        var localPosition = _lane.transform.InverseTransformPoint(worldPosition);
+        // TODO: [MTS-28] basic y clamp to lane orientation, revisit with elevation support
+        return new Vector3(localPosition.x, 0, localPosition.z);
     }
 
     private static T GetComponentSelfParentOrChildren<T>(GameObject gameObject) where T : Component

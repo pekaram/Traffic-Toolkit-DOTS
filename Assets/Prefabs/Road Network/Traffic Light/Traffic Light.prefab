@@ -153,10 +153,79 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 403086942436453968, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4221624265242310417}
+    - targetCorrespondingSourceObject: {fileID: 8978045101913002739, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6716456872621208078}
+    - targetCorrespondingSourceObject: {fileID: 6014423598857584095, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3642071631688565477}
   m_SourcePrefab: {fileID: 100100000, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+--- !u!1 &253514925463111821 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6014423598857584095, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+  m_PrefabInstance: {fileID: 5833054454028236114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3642071631688565477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 253514925463111821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 094295643fa6cd543ae5dccb2db629ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TrafficLight: {fileID: 7599980310407587247}
+  Signal: 1
+  EmissionColor: {r: 0, g: 1, b: 0, a: 0}
 --- !u!4 &1662901216992359796 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5179390012373336102, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
   m_PrefabInstance: {fileID: 5833054454028236114}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3200722797796599713 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8978045101913002739, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+  m_PrefabInstance: {fileID: 5833054454028236114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6716456872621208078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200722797796599713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 094295643fa6cd543ae5dccb2db629ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TrafficLight: {fileID: 7599980310407587247}
+  Signal: 2
+  EmissionColor: {r: 0.9095571, g: 1, b: 0, a: 0}
+--- !u!1 &6155050075255544578 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 403086942436453968, guid: 03e7de4288689cf4b87e065cd15980a3, type: 3}
+  m_PrefabInstance: {fileID: 5833054454028236114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4221624265242310417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6155050075255544578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 094295643fa6cd543ae5dccb2db629ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TrafficLight: {fileID: 7599980310407587247}
+  Signal: 0
+  EmissionColor: {r: 1, g: 0, b: 0, a: 0}

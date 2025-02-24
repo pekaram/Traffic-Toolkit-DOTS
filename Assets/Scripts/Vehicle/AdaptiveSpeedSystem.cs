@@ -33,9 +33,14 @@ public partial struct AdaptiveSpeedSystem : ISystem
                 continue;
             }
 
-            var colliderAspect = SystemAPI.GetAspect<ColliderAspect>(entity);    
+            var colliderAspect = SystemAPI.GetAspect<ColliderAspect>(entity);
             if (physicsWorld.CastCollider(in colliderAspect, transform.ValueRO.Forward(), CollisionDetectionDistance, out var hit))
             {
+                if (hit.Fraction < 0.001f)
+                {
+                    LogCollisionError(entity, hit.Entity, state.EntityManager);
+                }
+
                 if (SystemAPI.HasComponent<Vehicle>(hit.Entity))
                 {
                     Brake(vehicle, BrakingPower * deltaTime);
@@ -58,5 +63,14 @@ public partial struct AdaptiveSpeedSystem : ISystem
             return;
 
         vehicle.ValueRW.Speed += acceleratePower;
+    }
+
+    private void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
+    {
+        var id1 = entityManager.GetComponentData<FixedEntityId>(entity1).Id;
+        var id2 = entityManager.GetComponentData<FixedEntityId>(entity2).Id;
+
+        var formattedMessage = string.Format("Collision detected between: Entity1 {0} Entity2 {1}", id1, id2);
+        UnityEngine.Debug.LogError(formattedMessage);
     }
 }

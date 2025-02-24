@@ -86,13 +86,26 @@ public class EntityIdHierarchy : EditorWindow
 
             if (GUILayout.Button($"Entity: {idToEntity.Key}", buttonStyle))
             {
-                SelectEntity(entity);
-                Event.current.Use();
+                HandleEntityClicked(entity);
             }
         }
 
         EditorGUILayout.EndScrollView();
         HandleDeselect();
+    }
+
+    private void HandleEntityClicked(Entity entity)
+    {
+        if (entity == _selectedEntity)
+        {
+            EditorEntityFocus.Focus();
+        }
+        else
+        {
+            SelectEntity(entity);
+        }
+
+        Event.current.Use();
     }
 
     private void SelectEntity(Entity entity)

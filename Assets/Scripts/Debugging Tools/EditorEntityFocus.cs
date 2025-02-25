@@ -13,7 +13,7 @@ public static class EditorEntityFocus
     static EditorEntityFocus()
     {
         SceneView.duringSceneGui += OnSceneGUI;
-        Selection.selectionChanged += HandleSelectionChange;
+        EntitySelection.SelectionChanged += HandleSelectionChange;
     }
 
     public static void Focus()
@@ -21,10 +21,10 @@ public static class EditorEntityFocus
         IsFocused = true;
     }
 
-    private static void HandleSelectionChange()
+    private static void HandleSelectionChange(Entity entity)
     {
         IsFocused = false;
-        SelectedEntity = GetSelectedEntity(Selection.activeObject);
+        SelectedEntity = entity;
     }
 
     private static void OnSceneGUI(SceneView sceneView)
@@ -33,12 +33,6 @@ public static class EditorEntityFocus
             return;
 
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-        if (entityManager.EntityCapacity <= SelectedEntity.Index || !entityManager.Exists(SelectedEntity))
-        {
-            SelectedEntity = Entity.Null;
-            return;
-        }
 
         var e = Event.current;
         if (e.type == EventType.KeyDown && e.keyCode == KeyCode.F)
@@ -56,21 +50,5 @@ public static class EditorEntityFocus
             return;
 
         SceneView.lastActiveSceneView.pivot = transform.Position;
-    }
-
-
-    private static Entity GetSelectedEntity(Object selectedObject)
-    {
-        if (!selectedObject)
-            return Entity.Null;
-
-        // Unity uses EntitySelectionProxy internally for their Entity selections
-        // Workaround using reflection to access data from Unity's EntitySelectionProxy.Entity 
-        var entityProperty = selectedObject.GetType().GetProperty(nameof(Entity), typeof(Entity));
-        if (entityProperty == null)
-            return Entity.Null;
-
-        var entity = (Entity)entityProperty.GetValue(selectedObject);
-        return entity;
     }
 }

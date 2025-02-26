@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Aspects;
+using Unity.Physics.Systems;
 using Unity.Transforms;
 
 public partial struct AdaptiveSpeedSystem : ISystem
@@ -12,7 +13,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
 
     private const float AcceleratingPower = 100;
 
-    private const float CollisionDetectionDistance = 20;
+    public const float CollisionDetectionDistance = 20;
 
     private const float MinimumSpeed = 0;
 

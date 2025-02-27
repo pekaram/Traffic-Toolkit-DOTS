@@ -3507,6 +3507,10 @@ PrefabInstance:
       value: In 1
       objectReference: {fileID: 0}
     - target: {fileID: 1337080879443376084, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: TrafficLight
+      value: 
+      objectReference: {fileID: 1509530036}
+    - target: {fileID: 1337080879443376084, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.size
       value: 11
       objectReference: {fileID: 0}
@@ -3634,6 +3638,10 @@ PrefabInstance:
       propertyPath: 'ConnectedLanes.Array.data[2]'
       value: 
       objectReference: {fileID: 1071790946}
+    - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: TrafficLight
+      value: 
+      objectReference: {fileID: 1891997476}
     - target: {fileID: 1540484319944803554, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.size
       value: 0
@@ -3790,6 +3798,10 @@ PrefabInstance:
       propertyPath: Waypoints.Array.data[4].z
       value: 93.08192
       objectReference: {fileID: 0}
+    - target: {fileID: 3968219049957548320, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: TrafficLight
+      value: 
+      objectReference: {fileID: 66985154}
     - target: {fileID: 5463349964235400813, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: m_Name
       value: Out 1
@@ -4039,6 +4051,10 @@ PrefabInstance:
       value: In 1
       objectReference: {fileID: 0}
     - target: {fileID: 8235087126171211906, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: TrafficLight
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8235087126171211906, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -4086,6 +4102,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 'Street 1 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
+      propertyPath: TrafficLight
+      value: 
+      objectReference: {fileID: 923615428}
     - target: {fileID: 8639203839461100481, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       propertyPath: Waypoints.Array.size
       value: 4

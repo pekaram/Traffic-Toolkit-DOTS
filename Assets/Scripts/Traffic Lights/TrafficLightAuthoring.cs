@@ -1,17 +1,17 @@
 using UnityEngine;
 using Unity.Entities;
 using System.Collections.Generic;
+using System;
 
 public class TrafficLightAuthoring : MonoBehaviour
 {
     public List<LaneAuthoring> Lanes = new();
 
-    public void OnValidate()
+    public event Action OnValidated;
+
+    private void OnValidate()
     {
-        foreach (var lane in Lanes)
-        {
-            lane.TrafficLight = this;
-        }
+        OnValidated?.Invoke();
     }
 }
 

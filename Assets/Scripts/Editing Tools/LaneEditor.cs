@@ -7,6 +7,8 @@ public class LaneEditor : Editor
 {
     private LaneAuthoring _lane;
 
+    private TrafficLightAuthoring _bakedtrafficLight;
+
     private void OnEnable()
     {
         _lane = (LaneAuthoring)target;
@@ -17,8 +19,28 @@ public class LaneEditor : Editor
         if (_lane == null || _lane.Waypoints == null)
             return;
 
+        if (_bakedtrafficLight != _lane.TrafficLight)
+        {
+            OnBakedTrafficLightChange();
+        }
+
         Draw();
         HandleInput();
+    }
+
+    private void OnBakedTrafficLightChange()
+    {   
+        if (_bakedtrafficLight != null)
+        {
+            _bakedtrafficLight.Lanes.Remove(_lane);
+        }
+
+        if (_lane.TrafficLight != null && !_lane.TrafficLight.Lanes.Contains(_lane))
+        {
+            _lane.TrafficLight.Lanes.Add(_lane);
+        }
+
+        _bakedtrafficLight = _lane.TrafficLight;
     }
 
     private void Draw()

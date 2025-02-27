@@ -1,7 +1,6 @@
 using UnityEngine;
 using Unity.Entities;
 using System.Collections.Generic;
-using System.Linq;
 
 public class LaneAuthoring : MonoBehaviour
 {
@@ -9,7 +8,7 @@ public class LaneAuthoring : MonoBehaviour
 
     public List<LaneAuthoring> ConnectedLanes = new();
 
-    public TrafficLightAuthoring TrafficLight { get; set; }
+    public TrafficLightAuthoring TrafficLight;
 }
 
 public class LaneBaker : Baker<LaneAuthoring>

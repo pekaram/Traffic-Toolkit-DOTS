@@ -13,11 +13,17 @@ public class FixedEntityIdBaker : Baker<FixedEntityIdAuthority>
     {
         var entity = GetEntity(TransformUsageFlags.None);
 
-        AddComponent(entity, new FixedEntityId { Id = Guid.NewGuid().ToString() });
+        AddComponent(entity, new FixedEntityId
+        {
+            Id = Guid.NewGuid().ToString(),
+            DebugName = authoring.name
+        });
     }
 }
 
 public struct FixedEntityId : IComponentData
 {
     public FixedString64Bytes Id;
+
+    public FixedString32Bytes DebugName;
 }

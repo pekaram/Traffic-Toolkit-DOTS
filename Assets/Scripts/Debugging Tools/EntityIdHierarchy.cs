@@ -18,9 +18,11 @@ public class EntityIdHierarchy : EditorWindow
 
     private readonly Dictionary<string, Entity> _idsToEntities = new();
 
+    private readonly List<(string, Entity)> _namesToEntities = new();
+
     private Vector2 _scrollPosition;
 
-    private Entity? _selectedEntity = null; 
+    private Entity? _selectedEntity = null;
 
     [MenuItem("Window/Entity ID Hierarchy")]
     public static void ShowWindow()
@@ -73,18 +75,23 @@ public class EntityIdHierarchy : EditorWindow
 
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-        foreach (var idToEntity in _idsToEntities)
+        foreach (var nameToEntity in _namesToEntities)
         {
-            var entity = idToEntity.Value;
+            var entity = nameToEntity.Item2;
             var isSelected = _selectedEntity.HasValue && _selectedEntity.Value == entity;
-            var buttonStyle = new GUIStyle(EditorStyles.miniButton);
+            var buttonStyle = new GUIStyle(EditorStyles.miniButton)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(20, 20, 0, 0)
+            };
+
             if (isSelected)
             {
                 buttonStyle.normal.textColor = Color.green;
                 buttonStyle.hover.textColor = Color.green;
             }
 
-            if (GUILayout.Button($"Entity: {idToEntity.Key}", buttonStyle))
+            if (GUILayout.Button(nameToEntity.Item1, buttonStyle))
             {
                 HandleEntityClicked(entity);
             }
@@ -116,22 +123,25 @@ public class EntityIdHierarchy : EditorWindow
 
     private void RefreshEntities()
     {
-        var entityManager = World.EntityManager;
         _idsToEntities.Clear();
+        _namesToEntities.Clear();
 
-        _cachedEntityOrderVersion = entityManager.EntityOrderVersion;
+        var entityManager = World.EntityManager;
 
         using (var entityArray = entityManager.GetAllEntities(Allocator.Temp))
         {
             foreach (var entity in entityArray)
             {
                 if (!World.EntityManager.HasComponent<FixedEntityId>(entity))
-                    continue;
+                    continue;   
 
-                var id = World.EntityManager.GetComponentData<FixedEntityId>(entity).Id;
-                _idsToEntities.Add(id.ToString(), entity);
+                var fixedEntityID = World.EntityManager.GetComponentData<FixedEntityId>(entity);
+               
+                _idsToEntities.Add(fixedEntityID.Id.ToString(), entity);
+                _namesToEntities.Add((fixedEntityID.DebugName.ToString(), entity));
             }
         }
 
+        _cachedEntityOrderVersion = entityManager.EntityOrderVersion;
     }
 }

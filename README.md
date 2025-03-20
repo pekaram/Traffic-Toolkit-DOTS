@@ -1,9 +1,7 @@
 # 🚦 Traffic Toolkit DOTS
 A high performance traffic simulation toolkit built using Unity DOTS. Designed for large scale traffic systems with realistic AI movement, intersection management, and collision avoidance.
 
-
-https://github.com/user-attachments/assets/32141bb3-7cbd-489a-85e3-156580c1d1c0
-
+https://github.com/user-attachments/assets/7ac2a1cd-607c-4ed7-8057-ff10d8d51b79
 
 ## 🌟 Features
 ✔️ Built for Scale – DOTS powered architecture optimized to simulate thousands of vehicles efficiently!	

@@ -1,8 +1,7 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
-using Unity.Physics.Aspects;
-using Unity.Physics.Systems;
 using Unity.Transforms;
 
 public partial struct AdaptiveSpeedSystem : ISystem
@@ -13,57 +12,83 @@ public partial struct AdaptiveSpeedSystem : ISystem
 
     private const float AcceleratingPower = 100;
 
-    public const float CollisionDetectionDistance = 20;
+    public const float CollisionDetectionDistance = 10;
 
-    private const float MinimumSpeed = 0;
+    private const float MinimumSpeed = 0.1f;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+        var physicsWorldSystem = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
+        var collisionWorld = physicsWorldSystem.CollisionWorld;
         var deltaTime = SystemAPI.Time.DeltaTime;
 
-        foreach (var (vehicle, transform, entity) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>().WithEntityAccess())
+        var controlVehcileSpeed = new ControlVehicleSpeed() { CollisionWorld = collisionWorld, DeltaTime = deltaTime };
+        controlVehcileSpeed.ScheduleParallel();
+    }
+
+    [BurstCompile]
+    public partial struct ControlVehicleSpeed : IJobEntity
+    {
+        [ReadOnly] public CollisionWorld CollisionWorld;
+
+        public float DeltaTime;
+
+        public void Execute(ref Vehicle vehicle, LocalTransform transform, PhysicsCollider physicsCollider)
         {
-            if (vehicle.ValueRW.CurrentLane == Entity.Null)
-                continue;
-
-            if (vehicle.ValueRO.RemainingWaypoints == 0)
+            if (vehicle.RemainingWaypoints == 0)
             {
-                Brake(vehicle, BrakingPower * deltaTime);
-                continue;
+                Brake(ref vehicle, BrakingPower * DeltaTime);
+                return;
             }
 
-            var colliderAspect = SystemAPI.GetAspect<ColliderAspect>(entity);
-            if (physicsWorld.CastCollider(in colliderAspect, transform.ValueRO.Forward(), CollisionDetectionDistance, out var hit))
+            var colliderBlob = physicsCollider.Value;
+
+            var aabb = colliderBlob.Value.CalculateAabb();
+            float distanceToEdge = aabb.Extents.z;
+            float offset = distanceToEdge + 0.1f;
+
+            var origin = transform.Position;
+            var direction = transform.Forward();
+            var Start = transform.Position + transform.Forward() * offset;
+            var End = origin + direction * CollisionDetectionDistance;
+            var colliderCast = new ColliderCastInput(colliderBlob, Start, End);
+
+            CollisionWorld.CastCollider(colliderCast, out var hit);
+
+            if (hit.Entity != Entity.Null)
             {
-                if (hit.Fraction < 0.001f)
-                {
-                    LogCollisionError(entity, hit.Entity, state.EntityManager);
-                }
-
-                if (SystemAPI.HasComponent<Vehicle>(hit.Entity))
-                {
-                    Brake(vehicle, BrakingPower * deltaTime);
-                    continue;
-                }
+                Brake(ref vehicle, BrakingPower * DeltaTime);
             }
-
-            Accelerate(vehicle, AcceleratingPower * deltaTime);
+            else
+            {
+                Accelerate(ref vehicle, AcceleratingPower * DeltaTime);
+            }
         }
-    }
 
-    private void Brake(RefRW<Vehicle> vehicle, float brakePower)
-    {
-        vehicle.ValueRW.Speed = vehicle.ValueRW.Speed <= MinimumSpeed ? MinimumSpeed : vehicle.ValueRW.Speed - brakePower;
-    }
+        private void Brake(ref Vehicle vehicle, float brakePower)
+        {
+            if (vehicle.Speed < MinimumSpeed)
+            {
+                vehicle.Speed = 0;
+            }
+            else
+            {
+                vehicle.Speed = vehicle.Speed <= MinimumSpeed ? MinimumSpeed : vehicle.Speed - brakePower;
+            }
+        }
 
-    private void Accelerate(RefRW<Vehicle> vehicle, float acceleratePower)
-    {
-        if (vehicle.ValueRO.Speed >= IdealSpeed)
-            return;
-
-        vehicle.ValueRW.Speed += acceleratePower;
+        private void Accelerate(ref Vehicle vehicle, float acceleratePower)
+        {
+            if (vehicle.Speed >= IdealSpeed)
+            {
+                vehicle.Speed = IdealSpeed;
+            }
+            else
+            {
+                vehicle.Speed += acceleratePower;
+            }
+        }
     }
 
     private void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)

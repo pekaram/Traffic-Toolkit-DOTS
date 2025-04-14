@@ -4,7 +4,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
-
+#if UNITY_EDITOR
 [InitializeOnLoad]
 public static class SelectedVehicleGizmos
 {
@@ -80,3 +80,4 @@ public static class SelectedVehicleGizmos
         }
     }
 }
+#endif

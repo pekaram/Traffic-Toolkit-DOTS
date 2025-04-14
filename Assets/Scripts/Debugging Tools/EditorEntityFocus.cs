@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
 
 [InitializeOnLoad]
 public static class EditorEntityFocus
@@ -52,3 +53,4 @@ public static class EditorEntityFocus
         SceneView.lastActiveSceneView.pivot = transform.Position;
     }
 }
+#endif

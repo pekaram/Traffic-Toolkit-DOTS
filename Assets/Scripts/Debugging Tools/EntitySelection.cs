@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Entities;
 using UnityEditor;
+#if UNITY_EDITOR
 
 [InitializeOnLoad]
 public class EntitySelection
@@ -49,3 +50,4 @@ public class EntitySelection
         return entity;
     }
 }
+#endif

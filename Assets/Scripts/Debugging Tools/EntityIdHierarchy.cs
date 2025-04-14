@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using System.Reflection;
 using System;
+#if UNITY_EDITOR
 
 public class EntityIdHierarchy : EditorWindow
 {
@@ -145,3 +146,4 @@ public class EntityIdHierarchy : EditorWindow
         _cachedEntityOrderVersion = entityManager.EntityOrderVersion;
     }
 }
+#endif

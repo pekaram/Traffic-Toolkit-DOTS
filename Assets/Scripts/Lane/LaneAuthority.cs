@@ -25,7 +25,6 @@ public class LaneBaker : Baker<LaneAuthoring>
 
         AddComponent(entity, new Lane
         {
-            Width = 0,
             AssociatedTrafficLight = trafficLightEntity
         });
 

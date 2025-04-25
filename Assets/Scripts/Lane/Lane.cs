@@ -3,8 +3,6 @@ using Unity.Mathematics;
 
 public struct Lane : IComponentData
 {
-    public float Width;
-    public bool IsAvailable;
     public Entity AssociatedTrafficLight;
 }
 
@@ -15,5 +13,5 @@ public struct Waypoint : IBufferElementData
 
 public struct LaneConnection : IBufferElementData
 {
-    public Entity ConnectedLane; 
+    public Entity ConnectedLane;
 }

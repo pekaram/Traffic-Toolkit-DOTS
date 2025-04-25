@@ -32,9 +32,9 @@ public partial struct AdaptiveSpeedSystem : ISystem
     {
         [ReadOnly] public CollisionWorld CollisionWorld;
 
-        public float DeltaTime;
+        [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, LocalTransform transform, PhysicsCollider physicsCollider)
+        public void Execute(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
             if (vehicle.RemainingWaypoints == 0)
             {
@@ -43,17 +43,13 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
 
             var colliderBlob = physicsCollider.Value;
-
             var aabb = colliderBlob.Value.CalculateAabb();
-            float distanceToEdge = aabb.Extents.z;
-            float offset = distanceToEdge + 0.1f;
+            var distanceToColliderTip = aabb.Extents.z;
+            var startOffset = distanceToColliderTip + 0.1f;
+            var start = transform.Position + transform.Forward() * startOffset;
+            var end = transform.Position + transform.Forward() * CollisionDetectionDistance;
 
-            var origin = transform.Position;
-            var direction = transform.Forward();
-            var Start = transform.Position + transform.Forward() * offset;
-            var End = origin + direction * CollisionDetectionDistance;
-            var colliderCast = new ColliderCastInput(colliderBlob, Start, End);
-
+            var colliderCast = new ColliderCastInput(colliderBlob, start, end);
             CollisionWorld.CastCollider(colliderCast, out var hit);
 
             if (hit.Entity != Entity.Null)

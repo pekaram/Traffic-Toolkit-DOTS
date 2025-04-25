@@ -13,10 +13,10 @@ class VehicleBaker : Baker<VehicleAuthoring>
     public override void Bake(VehicleAuthoring authoring)
     {
         var entity = GetEntity(TransformUsageFlags.Dynamic);
-        AddComponent(entity, new Vehicle
+        AddComponent(entity, new VehicleV2
         {
             Speed = authoring.Speed,
-            CurrentLane = GetEntity(authoring.Lane, TransformUsageFlags.None)
+            CurrentSegment = GetEntity(authoring.Lane, TransformUsageFlags.None)
         });
     }
 }

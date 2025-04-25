@@ -12,3 +12,10 @@ public struct Vehicle : IComponentData
 
     public Entity NextLane;
 }
+
+public struct VehicleV2 : IComponentData
+{
+    public float Speed;
+    public Entity CurrentSegment;
+    public float T;
+}

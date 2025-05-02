@@ -33,7 +33,6 @@ public partial struct TranslateVehicleSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-
         void Execute(ref VehicleV2 vehicle, ref LocalTransform transform)
         {
             if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f)
@@ -42,28 +41,10 @@ public partial struct TranslateVehicleSystem : ISystem
             if (!SegmentLookup.TryGetComponent(vehicle.CurrentSegment, out var segment))
                 return;
 
-            var speed = vehicle.Speed;
-            var newPos = transform.Position;
-         
-            var steps = 10000;
-            var currentStep = vehicle.T * steps;
-            for (var t = currentStep; t <= steps + 1; t += 1)
-            {
-                vehicle.T = t / steps;
-                newPos = EvaluateCubicBezier(
-                    segment.Start,
-                    segment.StartTangent,
-                    segment.EndTangent,
-                    segment.End,
-                    vehicle.T);
+            transform.Position = EvaluateCubicBezier(segment, vehicle.T);
 
-                if (math.distance(newPos, transform.Position) >= 10 * DeltaTime)
-                    break;
-
-                if (vehicle.T >= 1)
-                    break;
-            }
-
+            vehicle.T = TranslateT(segment, vehicle.T, vehicle.Speed * DeltaTime);
+            var newPos = EvaluateCubicBezier(segment, vehicle.T);
             var direction = math.normalize(newPos - transform.Position);
             var targetRotation = quaternion.LookRotationSafe(direction, math.up());
 
@@ -71,8 +52,40 @@ public partial struct TranslateVehicleSystem : ISystem
             transform.Position = newPos;
         }
 
-        private static float3 EvaluateCubicBezier(float3 p0, float3 p1, float3 p2, float3 p3, float t)
+        private static float TranslateT(Segment segment, float t, float targetDistance)
         {
+            const int steps = 1000;
+            var newPosition = EvaluateCubicBezier(segment, t);
+            var oldPosition = newPosition;
+            for (var step = t * steps; step <= steps + 1; step += 1)
+            {
+                t = step / steps;
+                newPosition = EvaluateCubicBezier(segment, t);
+                var steppedDistance = math.distance(newPosition, oldPosition);
+                if (steppedDistance < targetDistance)
+                    continue;
+
+                var previousT = (step - 1) / steps;
+                var previousPosition = EvaluateCubicBezier(segment, previousT);
+                var previousDistance = math.distance(oldPosition, previousPosition);
+
+                var ratio = (targetDistance - previousDistance) / (steppedDistance - previousDistance);
+                var interpretedT = math.lerp(previousT, t, ratio);
+
+                return interpretedT;
+            }
+
+            UnityEngine.Debug.LogError("Failed to Translate T");
+            return t;
+        }
+
+        private static float3 EvaluateCubicBezier(Segment segment, float t)
+        {
+            var p0 = segment.Start;
+            var p1 = segment.StartTangent;
+            var p2 = segment.EndTangent;
+            var p3 = segment.End;
+
             float u = 1 - t;
             return
                 u * u * u * p0 +

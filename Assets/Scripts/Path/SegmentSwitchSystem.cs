@@ -28,7 +28,7 @@ public partial struct SegmentSwitchSystem : ISystem
     private bool CanSwitchSegment(RefRW<VehicleV2> vehicle, ref SystemState state)
     {
         var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
-
+ 
         if (segment.AssociatedTrafficLight == Entity.Null)
             return true;
 

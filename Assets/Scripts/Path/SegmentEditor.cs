@@ -2,7 +2,6 @@
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [CustomEditor(typeof(SegmentAuthoring)), CanEditMultipleObjects]
 public class SegmentEditor : Editor
@@ -89,7 +88,7 @@ public class SegmentEditor : Editor
             _segment.EndTangent = newEndTangent;
             _segment.End = newEnd;
         }
-
+ 
         Handles.color = Color.green;
         Handles.DrawBezier(newStart, newEnd, newStartTangent, newEndTangent, Color.green, null, 3f);
 
@@ -112,43 +111,44 @@ public class SegmentEditor : Editor
 
     private void DrawConnection(SegmentAuthoringConnection connection)
     {
-        var extraPt = EvaluateCubicBezier(_segment.Start, _segment.StartTangent, _segment.EndTangent, _segment.End, 0.975f);
-        var extraPt2 = EvaluateCubicBezier(_segment.Start, _segment.StartTangent, _segment.EndTangent, _segment.End, 1);
+        const float TipsSamplingDistance = 0.025f;
 
-        var extra1Pt = EvaluateCubicBezier(connection.EndPoint.Start, connection.EndPoint.StartTangent,  connection.EndPoint.EndTangent, connection.EndPoint.End, 0.025f);
-        var extra1Pt2 = EvaluateCubicBezier(connection.EndPoint.Start,connection.EndPoint.StartTangent,  connection.EndPoint.EndTangent, connection.EndPoint.End, 0);
+        var segmentA = _segment;
+        var segmentB = connection.EndPoint;
 
-        Vector3 start = _segment.End;
-        Vector3 end = connection.EndPoint.Start;
+        var preSegmentAEnd = EvaluateCubicBezier(segmentA.Start, segmentA.StartTangent, segmentA.EndTangent, segmentA.End, 1 - TipsSamplingDistance);
+        var postSegmentBStart = EvaluateCubicBezier(segmentB.Start, segmentB.StartTangent, segmentB.EndTangent, segmentB.End, 0 + TipsSamplingDistance);
 
-        Vector3 dirA = (extraPt2 - extraPt).normalized;
-        Vector3 dirB = (extra1Pt - extra1Pt2).normalized;
+        var segmentADirection = (segmentA.End - preSegmentAEnd).normalized;
+        var segmentBDirection = (postSegmentBStart - segmentB.Start).normalized;
 
-        float len = Vector3.Distance(start, end) / 2f;
+        var tangentDistance = Vector3.Distance(segmentA.End, segmentB.Start) / 2f;
+        var startTangent = segmentA.End + segmentADirection * tangentDistance;
+        var endTangent = segmentB.Start - segmentBDirection * tangentDistance;
 
-        Vector3 qp1 = start + dirA * len;
-        Vector3 qp2 = end - dirB * len;
-
-        Handles.SphereHandleCap(0, qp1, quaternion.identity, 1, EventType.Repaint);
-        Handles.color = Color.blue;
-        Handles.SphereHandleCap(0, qp2, quaternion.identity, 1, EventType.Repaint);
-
-        connection.StartTangent = qp1;
-        connection.EndTangent = qp2;
-
-        Vector3 p0 = _segment.End;
-        Vector3 p1 = connection.StartTangent;
-        Vector3 p2 = connection.EndTangent;
-        Vector3 p3 = connection.EndPoint.Start;
-
-        // Interactive Handles
-        Vector3 newP0 = Handles.PositionHandle(p0, Quaternion.identity);
-        Vector3 newP1 = Handles.PositionHandle(p1, Quaternion.identity);
-        Vector3 newP2 = Handles.PositionHandle(p2, Quaternion.identity);
-        Vector3 newP3 = Handles.PositionHandle(p3, Quaternion.identity);
+        connection.StartTangent = startTangent;
+        connection.EndTangent = endTangent;
 
         Handles.color = Color.yellow;
-        Handles.DrawBezier(newP0, newP3, newP1, newP2, Color.yellow, null, 3f);
+        Handles.SphereHandleCap(0, segmentB.Start, quaternion.identity, 0.5f, EventType.Repaint); 
+        Handles.DrawBezier(segmentA.End, segmentB.Start, connection.StartTangent, connection.EndTangent, Color.yellow, null, 3f);
+    }
+
+    private void DrawPreview()
+    {
+        if (_pendingStart == null)
+            return;
+
+        var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        var plane = new Plane(Vector3.up, Vector3.zero);
+
+        if (!plane.Raycast(ray, out float distance))
+            return;
+
+        Vector3 previewEnd = ray.GetPoint(distance);
+        Handles.color = new Color(1f, 1f, 1f, 0.5f);
+        Handles.DrawDottedLine(_pendingStart.Value, previewEnd, 5f);
+        SceneView.RepaintAll();
     }
 
     private static Vector3 EvaluateCubicBezier(float3 p0, float3 p1, float3 p2, float3 p3, float t)
@@ -159,23 +159,6 @@ public class SegmentEditor : Editor
             3 * u * u * t * p1 +
             3 * u * t * t * p2 +
             t * t * t * p3;
-    }
-
-    private void DrawPreview()
-    {
-        if (_pendingStart == null)
-            return;
-
-        Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-        Plane plane = new Plane(Vector3.up, Vector3.zero);
-
-        if (plane.Raycast(ray, out float distance))
-        {
-            Vector3 previewEnd = ray.GetPoint(distance);
-            Handles.color = new Color(1f, 1f, 1f, 0.5f);
-            Handles.DrawDottedLine(_pendingStart.Value, previewEnd, 5f);
-            SceneView.RepaintAll();
-        }
     }
 }
 #endif

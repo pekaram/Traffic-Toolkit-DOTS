@@ -34,14 +34,8 @@ public partial struct AdaptiveSpeedSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        public void Execute(ref VehicleV2 vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
-            if (vehicle.RemainingWaypoints == 0)
-            {
-                Brake(ref vehicle, BrakingPower * DeltaTime);
-                return;
-            }
-
             var colliderBlob = physicsCollider.Value;
             var aabb = colliderBlob.Value.CalculateAabb();
             var distanceToColliderTip = aabb.Extents.z;
@@ -62,7 +56,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
         }
 
-        private void Brake(ref Vehicle vehicle, float brakePower)
+        private void Brake(ref VehicleV2 vehicle, float brakePower)
         {
             if (vehicle.Speed < MinimumSpeed)
             {
@@ -74,7 +68,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
         }
 
-        private void Accelerate(ref Vehicle vehicle, float acceleratePower)
+        private void Accelerate(ref VehicleV2 vehicle, float acceleratePower)
         {
             if (vehicle.Speed >= IdealSpeed)
             {
@@ -87,7 +81,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
         }
     }
 
-    private void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
+    private static void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
     {
         var id1 = entityManager.GetComponentData<FixedEntityId>(entity1).Id;
         var id2 = entityManager.GetComponentData<FixedEntityId>(entity2).Id;

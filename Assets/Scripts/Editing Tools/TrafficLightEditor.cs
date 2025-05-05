@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,32 +8,33 @@ public class TrafficLightEditor : Editor
 {
     private TrafficLightAuthoring _trafficLight;
 
-    private readonly List<LaneAuthoring> _bakedLanes = new();
+    private List<SegmentAuthoring> _controlledSegmentsCache;
 
     private void OnEnable()
     {
         _trafficLight = (TrafficLightAuthoring)target;
         _trafficLight.OnValidated += OnValidate;
+
+        _controlledSegmentsCache = new List<SegmentAuthoring>(_trafficLight.ControlledSegments);
     }
 
     private void OnSceneGUI()
     {
         Visualize(_trafficLight);
-
     }
 
     private void OnValidate()
     {
-        foreach (var _bakedLanes in _bakedLanes)
+        foreach (var _bakedSegments in _controlledSegmentsCache)
         {
-            _bakedLanes.TrafficLight = null;
+            _bakedSegments.AssociatedTrafficLight = null;
         }
-        _bakedLanes.Clear();
+        _controlledSegmentsCache.Clear();
 
-        foreach (var lane in _trafficLight.Lanes)
+        foreach (var segment in _trafficLight.ControlledSegments)
         {
-            lane.TrafficLight = _trafficLight;
-            _bakedLanes.Add(lane);
+            segment.AssociatedTrafficLight = _trafficLight;
+            _controlledSegmentsCache.Add(segment);
         }
     }
 

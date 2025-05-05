@@ -33,7 +33,7 @@ public partial struct TranslateVehicleSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-        void Execute(ref VehicleV2 vehicle, ref LocalTransform transform)
+        void Execute(ref Vehicle vehicle, ref LocalTransform transform)
         {
             if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f)
                 return;
@@ -60,6 +60,9 @@ public partial struct TranslateVehicleSystem : ISystem
             for (var step = t * steps; step <= steps + 1; step += 1)
             {
                 t = step / steps;
+                if (t > 1)
+                    return 1;
+            
                 newPosition = EvaluateCubicBezier(segment, t);
                 var steppedDistance = math.distance(newPosition, oldPosition);
                 if (steppedDistance < targetDistance)

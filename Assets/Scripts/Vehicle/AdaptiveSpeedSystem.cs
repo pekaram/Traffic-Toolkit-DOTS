@@ -6,15 +6,13 @@ using Unity.Transforms;
 
 public partial struct AdaptiveSpeedSystem : ISystem
 {
-    private const float IdealSpeed = 20;
-
-    private const float BrakingPower = 100;
+    private const float MaxSpeed = 20;
+    private const float MinimumSpeed = 0.1f;
 
     private const float AcceleratingPower = 100;
-
+    private const float BrakingPower = 100;
+    
     public const float CollisionDetectionDistance = 10;
-
-    private const float MinimumSpeed = 0.1f;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -34,7 +32,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref VehicleV2 vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        public void Execute(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
             var colliderBlob = physicsCollider.Value;
             var aabb = colliderBlob.Value.CalculateAabb();
@@ -56,7 +54,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
         }
 
-        private void Brake(ref VehicleV2 vehicle, float brakePower)
+        private void Brake(ref Vehicle vehicle, float brakePower)
         {
             if (vehicle.Speed < MinimumSpeed)
             {
@@ -64,15 +62,15 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
             else
             {
-                vehicle.Speed = vehicle.Speed <= MinimumSpeed ? MinimumSpeed : vehicle.Speed - brakePower;
+                vehicle.Speed -= brakePower;
             }
         }
 
-        private void Accelerate(ref VehicleV2 vehicle, float acceleratePower)
+        private void Accelerate(ref Vehicle vehicle, float acceleratePower)
         {
-            if (vehicle.Speed >= IdealSpeed)
+            if (vehicle.Speed >= MaxSpeed)
             {
-                vehicle.Speed = IdealSpeed;
+                vehicle.Speed = MaxSpeed;
             }
             else
             {

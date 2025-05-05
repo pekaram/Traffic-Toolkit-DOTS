@@ -16,7 +16,7 @@ public partial struct SegmentSwitchSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         _connectionLookup.Update(ref state);
-        foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<VehicleV2>, RefRW<LocalTransform>>())
+        foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
         {
             if (vehicle.ValueRO.T < 1)
                 continue;
@@ -25,7 +25,7 @@ public partial struct SegmentSwitchSystem : ISystem
         }
     }
 
-    private bool CanSwitchSegment(RefRW<VehicleV2> vehicle, ref SystemState state)
+    private bool CanSwitchSegment(RefRW<Vehicle> vehicle, ref SystemState state)
     {
         var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
  
@@ -36,7 +36,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return trafficLight.Signal == TrafficLightSignal.Green;
     }
 
-    private bool TrySwitchToNextLane(RefRW<VehicleV2> vehicle, ref SystemState state)
+    private bool TrySwitchToNextLane(RefRW<Vehicle> vehicle, ref SystemState state)
     {
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
             return false;
@@ -52,7 +52,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return true;
     }
 
-    private Entity TrySetNextLane(RefRW<VehicleV2> vehicle, int index)
+    private Entity TrySetNextLane(RefRW<Vehicle> vehicle, int index)
     {
         _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentSegment, out var connections);
         if (connections.Length == 0)

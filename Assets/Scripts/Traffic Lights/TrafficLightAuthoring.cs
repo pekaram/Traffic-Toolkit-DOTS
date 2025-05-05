@@ -5,7 +5,7 @@ using System;
 
 public class TrafficLightAuthoring : MonoBehaviour
 {
-    public List<LaneAuthoring> Lanes = new();
+    public List<SegmentAuthoring> ControlledSegments = new();
 
     public event Action OnValidated;
 

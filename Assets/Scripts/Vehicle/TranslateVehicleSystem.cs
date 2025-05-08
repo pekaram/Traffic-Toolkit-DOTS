@@ -35,7 +35,7 @@ public partial struct TranslateVehicleSystem : ISystem
 
         void Execute(ref Vehicle vehicle, ref LocalTransform transform)
         {
-            if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f)
+            if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f || vehicle.Speed == 0)
                 return;
 
             if (!SegmentLookup.TryGetComponent(vehicle.CurrentSegment, out var segment))

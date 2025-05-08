@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Entities;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 public class SegmentAuthoring : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class SegmentAuthoring : MonoBehaviour
     public List<SegmentAuthoringConnection> ConnectedSegments = new List<SegmentAuthoringConnection>();
 
     class Baker : Baker<SegmentAuthoring>
-    {
+    { 
         public override void Bake(SegmentAuthoring authoring)
         {
             var trafficLightEntity = Entity.Null;
@@ -27,10 +28,10 @@ public class SegmentAuthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.WorldSpace);
             AddComponent(entity, new Segment
             {
-                Start = authoring.Start,
-                StartTangent = authoring.StartTangent,
-                EndTangent = authoring.EndTangent,
-                End = authoring.End,
+                Start = TransformPoint(authoring, authoring.Start),
+                StartTangent = TransformPoint(authoring, authoring.StartTangent),
+                EndTangent = TransformPoint(authoring, authoring.EndTangent),
+                End = TransformPoint(authoring, authoring.End),
                 AssociatedTrafficLight = trafficLightEntity
             });
 
@@ -40,10 +41,10 @@ public class SegmentAuthoring : MonoBehaviour
                 var connectionEntity = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
                 AddComponent(connectionEntity, new Segment
                 {
-                    Start = authoring.End,
-                    StartTangent = connection.StartTangent,
-                    EndTangent = connection.EndTangent,
-                    End = connection.EndPoint.Start
+                    Start = TransformPoint(authoring, authoring.End),
+                    StartTangent = TransformPoint(authoring, connection.StartTangent),
+                    EndTangent = TransformPoint(connection.EndPoint, connection.EndTangent),
+                    End = TransformPoint(connection.EndPoint, connection.EndPoint.Start)
                 });
                 var connectedSegment = AddBuffer<SegmentConnection>(connectionEntity);
                 var connectedSgementEntity = GetEntity(connection.EndPoint, TransformUsageFlags.None);
@@ -51,6 +52,11 @@ public class SegmentAuthoring : MonoBehaviour
 
                 connections.Add(new SegmentConnection { ConnectedSegment = connectionEntity });
             }
+        }
+
+        private float3 TransformPoint(SegmentAuthoring segment, Vector3 localPosition)
+        {
+            return segment.transform.TransformPoint(localPosition);
         }
     }
 }

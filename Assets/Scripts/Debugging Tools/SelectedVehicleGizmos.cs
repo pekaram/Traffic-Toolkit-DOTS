@@ -4,7 +4,6 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
-using static UnityEngine.Rendering.HableCurve;
 #if UNITY_EDITOR
 [InitializeOnLoad]
 public static class SelectedVehicleGizmos

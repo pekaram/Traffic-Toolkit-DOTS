@@ -88,8 +88,8 @@ public class SegmentEditor : Editor
     {
         Undo.RecordObject(_segment, "Set Segment Points");
 
-        _segment.Start = InverseTransformPoint(start);
-        _segment.End = InverseTransformPoint(end);
+        _segment.Start = InverseTransformPoint(_segment, start);
+        _segment.End = InverseTransformPoint(_segment, end);
 
         var direction = (_segment.End - _segment.Start).normalized;
         var length = Vector3.Distance(_segment.Start, _segment.End) / 3f;
@@ -102,10 +102,10 @@ public class SegmentEditor : Editor
     private void DrawSegment()
     {
         EditorGUI.BeginChangeCheck();
-        var startWorld = TransformPoint(_segment.Start);
-        var startTangentWorld = TransformPoint(_segment.StartTangent);
-        var endTangentWorld = TransformPoint(_segment.EndTangent);
-        var endWorld = TransformPoint(_segment.End);
+        var startWorld = TransformPoint(_segment, _segment.Start);
+        var startTangentWorld = TransformPoint(_segment, _segment.StartTangent);
+        var endTangentWorld = TransformPoint(_segment, _segment.EndTangent);
+        var endWorld = TransformPoint(_segment, _segment.End);
 
         var newStart = Handles.PositionHandle(startWorld, Quaternion.identity);
         var newStartTangent = Handles.PositionHandle(startTangentWorld, Quaternion.identity);
@@ -124,10 +124,10 @@ public class SegmentEditor : Editor
         {
             Undo.RecordObject(_segment, "Move Bezier Handles");
 
-            _segment.Start = InverseTransformPoint(newStart);
-            _segment.StartTangent = InverseTransformPoint(newStartTangent);
-            _segment.EndTangent = InverseTransformPoint(newEndTangent);
-            _segment.End = InverseTransformPoint(newEnd);
+            _segment.Start = InverseTransformPoint(_segment, newStart);
+            _segment.StartTangent = InverseTransformPoint(_segment, newStartTangent);
+            _segment.EndTangent = InverseTransformPoint(_segment, newEndTangent);
+            _segment.End = InverseTransformPoint(_segment, newEnd);
         }
     }
 
@@ -138,33 +138,57 @@ public class SegmentEditor : Editor
             if (connection.EndPoint == null) 
                 continue;
 
+            GenerateTangents(segment, connection);
             DrawConnection(connection);    
         }
     }
 
-    private void DrawConnection(SegmentAuthoringConnection connection)
+    private static void GenerateTangents(SegmentAuthoring segment, SegmentAuthoringConnection connection)
     {
         const float TipsSamplingDistance = 0.025f;
 
+        var segmentA = segment;
+        var segmentB = connection.EndPoint;
+
+        var segmentAStart = TransformPoint(segmentA, segmentA.Start);
+        var segmentAEnd = TransformPoint(segmentA, segmentA.End);
+        var segmentAStartTangent = TransformPoint(segmentA, segmentA.StartTangent);
+        var segmentAEndTangent = TransformPoint(segmentA, segmentA.EndTangent);
+
+        var segmentBStart = TransformPoint(segmentB, segmentB.Start);
+        var segmentBEnd = TransformPoint(segmentB, segmentB.End);
+        var segmentBStartTangent = TransformPoint(segmentB, segmentB.StartTangent);
+        var segmentBEndTangent = TransformPoint(segmentB, segmentB.EndTangent);
+
+        var preSegmentAEnd = EvaluateCubicBezier(segmentAStart, segmentAStartTangent, segmentAEndTangent, segmentAEnd, 1 - TipsSamplingDistance);
+        var postSegmentBStart = EvaluateCubicBezier(segmentBStart, segmentBStartTangent, segmentBEndTangent, segmentBEnd, 0 + TipsSamplingDistance);
+
+
+        var segmentADirection = (segmentAEnd - preSegmentAEnd).normalized;
+        var segmentBDirection = (postSegmentBStart - segmentBStart).normalized;
+
+        var tangentDistance = Vector3.Distance(segmentAEnd, segmentBStart) / 2f;
+        var startTangent = segmentAEnd + segmentADirection * tangentDistance;
+        var endTangent = segmentBStart - segmentBDirection * tangentDistance;
+
+        connection.StartTangent = InverseTransformPoint(segmentA, startTangent);
+        connection.EndTangent = InverseTransformPoint(segmentB, endTangent);
+    }
+
+
+    private void DrawConnection(SegmentAuthoringConnection connection)
+    {
         var segmentA = _segment;
         var segmentB = connection.EndPoint;
 
-        var preSegmentAEnd = EvaluateCubicBezier(segmentA.Start, segmentA.StartTangent, segmentA.EndTangent, segmentA.End, 1 - TipsSamplingDistance);
-        var postSegmentBStart = EvaluateCubicBezier(segmentB.Start, segmentB.StartTangent, segmentB.EndTangent, segmentB.End, 0 + TipsSamplingDistance);
-
-        var segmentADirection = (segmentA.End - preSegmentAEnd).normalized;
-        var segmentBDirection = (postSegmentBStart - segmentB.Start).normalized;
-
-        var tangentDistance = Vector3.Distance(segmentA.End, segmentB.Start) / 2f;
-        var startTangent = segmentA.End + segmentADirection * tangentDistance;
-        var endTangent = segmentB.Start - segmentBDirection * tangentDistance;
-
-        connection.StartTangent = startTangent;
-        connection.EndTangent = endTangent;
+        var segmentAEnd = TransformPoint(segmentA, segmentA.End);
+        var segmentBStart = TransformPoint(segmentB, segmentB.Start);
+        var startTangent = TransformPoint(segmentA, connection.StartTangent);
+        var endTangent = TransformPoint(segmentB, connection.EndTangent);
 
         Handles.color = Color.yellow;
-        Handles.SphereHandleCap(0, segmentB.Start, quaternion.identity, 0.5f, EventType.Repaint); 
-        Handles.DrawBezier(segmentA.End, segmentB.Start, connection.StartTangent, connection.EndTangent, Color.yellow, null, 3f);
+        Handles.SphereHandleCap(0, segmentBStart, quaternion.identity, 0.5f, EventType.Repaint); 
+        Handles.DrawBezier(segmentAEnd, segmentBStart, startTangent, endTangent, Color.yellow, null, 3f);
     }
 
     private void DrawPreview()
@@ -194,16 +218,16 @@ public class SegmentEditor : Editor
             t * t * t * p3;
     }
 
-    private Vector3 TransformPoint(Vector3 localPosition)
+    private static Vector3 InverseTransformPoint(SegmentAuthoring segment, Vector3 worldPosition)
     {
-        return _segment.transform.TransformPoint(localPosition);
-    }
-
-    private Vector3 InverseTransformPoint(Vector3 worldPosition)
-    {
-        var localPosition = _segment.transform.InverseTransformPoint(worldPosition);
+        var localPosition = segment.transform.InverseTransformPoint(worldPosition);
         // TODO: [MTS-28] basic y clamp to lane orientation, revisit with elevation support
         return new Vector3(localPosition.x, 0, localPosition.z);
+    }
+
+    private static Vector3 TransformPoint(SegmentAuthoring segment, Vector3 localPosition)
+    {
+        return segment.transform.TransformPoint(localPosition);
     }
 }
 #endif

@@ -31,15 +31,17 @@ public static class SelectedVehicleGizmos
 
     private static void OnSceneGUI(SceneView sceneView)
     {
-        if (SelectedVehicleEntity == Entity.Null)
+        if (SelectedVehicleEntity == Entity.Null || !EntityManager.Exists(SelectedVehicleEntity))
             return;
 
         var vehicle = EntityManager.GetComponentData<Vehicle>(SelectedVehicleEntity);
         var transform = EntityManager.GetComponentData<LocalToWorld>(SelectedVehicleEntity);
 
-        var vehiclePosition = transform.Position;
-        var waypointPosition = vehicle.WaypointPosition;
-        DrawWaypointLine(vehiclePosition, waypointPosition);
+        if (vehicle.CurrentSegment != Entity.Null)
+        {
+            var segment = EntityManager.GetComponentData<Segment>(vehicle.CurrentSegment);
+            DrawSegment(segment);
+        }
 
         // TODO: [MTS-41] Collision Debugging Gizmos should get fed data from collision avoidance system
         var collider = EntityManager.GetComponentData<PhysicsCollider>(SelectedVehicleEntity);
@@ -48,13 +50,12 @@ public static class SelectedVehicleGizmos
         DrawBoundingBox(boundingBox, transform.Position, transform.Rotation);
     }
 
-    private static void DrawWaypointLine(Vector3 from, Vector3 to)
+    private static void DrawSegment(Segment segment)
     {
         Handles.color = Color.green;
-        Handles.DrawDottedLine(from, to, 5f);
-        Handles.SphereHandleCap(0, to, Quaternion.identity, 0.5f, EventType.Repaint);
+        Handles.DrawBezier(segment.Start, segment.End, segment.StartTangent, segment.EndTangent, Color.green, null, 3f);
+        Handles.SphereHandleCap(0, segment.End, Quaternion.identity, 0.5f, EventType.Repaint);
     }
-
 
     private static void DrawRaycastLine(Aabb boundingBox, float3 position, float3 rayDirection, float hitDistance)
     {

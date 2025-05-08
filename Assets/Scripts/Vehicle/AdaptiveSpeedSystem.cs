@@ -6,15 +6,13 @@ using Unity.Transforms;
 
 public partial struct AdaptiveSpeedSystem : ISystem
 {
-    private const float IdealSpeed = 20;
-
-    private const float BrakingPower = 100;
+    private const float MaxSpeed = 20;
+    private const float MinimumSpeed = 0.1f;
 
     private const float AcceleratingPower = 100;
-
+    private const float BrakingPower = 100;
+    
     public const float CollisionDetectionDistance = 10;
-
-    private const float MinimumSpeed = 0.1f;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -32,28 +30,18 @@ public partial struct AdaptiveSpeedSystem : ISystem
     {
         [ReadOnly] public CollisionWorld CollisionWorld;
 
-        public float DeltaTime;
+        [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, LocalTransform transform, PhysicsCollider physicsCollider)
+        public void Execute(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
-            if (vehicle.RemainingWaypoints == 0)
-            {
-                Brake(ref vehicle, BrakingPower * DeltaTime);
-                return;
-            }
-
             var colliderBlob = physicsCollider.Value;
-
             var aabb = colliderBlob.Value.CalculateAabb();
-            float distanceToEdge = aabb.Extents.z;
-            float offset = distanceToEdge + 0.1f;
+            var distanceToColliderTip = aabb.Extents.z;
+            var startOffset = distanceToColliderTip + 0.1f;
+            var start = transform.Position + transform.Forward() * startOffset;
+            var end = transform.Position + transform.Forward() * CollisionDetectionDistance;
 
-            var origin = transform.Position;
-            var direction = transform.Forward();
-            var Start = transform.Position + transform.Forward() * offset;
-            var End = origin + direction * CollisionDetectionDistance;
-            var colliderCast = new ColliderCastInput(colliderBlob, Start, End);
-
+            var colliderCast = new ColliderCastInput(colliderBlob, start, end);
             CollisionWorld.CastCollider(colliderCast, out var hit);
 
             if (hit.Entity != Entity.Null)
@@ -74,15 +62,15 @@ public partial struct AdaptiveSpeedSystem : ISystem
             }
             else
             {
-                vehicle.Speed = vehicle.Speed <= MinimumSpeed ? MinimumSpeed : vehicle.Speed - brakePower;
+                vehicle.Speed -= brakePower;
             }
         }
 
         private void Accelerate(ref Vehicle vehicle, float acceleratePower)
         {
-            if (vehicle.Speed >= IdealSpeed)
+            if (vehicle.Speed >= MaxSpeed)
             {
-                vehicle.Speed = IdealSpeed;
+                vehicle.Speed = MaxSpeed;
             }
             else
             {
@@ -91,7 +79,7 @@ public partial struct AdaptiveSpeedSystem : ISystem
         }
     }
 
-    private void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
+    private static void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
     {
         var id1 = entityManager.GetComponentData<FixedEntityId>(entity1).Id;
         var id2 = entityManager.GetComponentData<FixedEntityId>(entity2).Id;

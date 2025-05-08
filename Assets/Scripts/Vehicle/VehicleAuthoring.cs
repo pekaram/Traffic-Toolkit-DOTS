@@ -1,11 +1,11 @@
 using UnityEngine;
 using Unity.Entities;
-using Unity.Mathematics;
 
 class VehicleAuthoring : MonoBehaviour
 {
     public float Speed;
     public GameObject Lane;
+    public float T;
 }
 
 class VehicleBaker : Baker<VehicleAuthoring>
@@ -16,7 +16,8 @@ class VehicleBaker : Baker<VehicleAuthoring>
         AddComponent(entity, new Vehicle
         {
             Speed = authoring.Speed,
-            CurrentLane = GetEntity(authoring.Lane, TransformUsageFlags.None)
+            CurrentSegment = GetEntity(authoring.Lane, TransformUsageFlags.None),
+            T = authoring.T
         });
     }
 }

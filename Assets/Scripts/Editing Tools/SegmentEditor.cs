@@ -21,7 +21,7 @@ public class SegmentEditor : Editor
         HandleInput(Event.current);
         DrawPreview();
 
-        DrawSegment();
+        PositionSegmentHandles(_segment);
         DrawSegmentConnections(_segment);
 
         if (_cachedTrafficLight != _segment.AssociatedTrafficLight)
@@ -60,7 +60,10 @@ public class SegmentEditor : Editor
             return;
         }
 
-        if (e.type != EventType.MouseDown || !(e.button == 0 && e.shift))
+        if (e.type != EventType.MouseDown || e.button != 0)
+            return;
+
+        if (_pendingStart == null && !e.shift)
             return;
 
         e.Use();
@@ -99,39 +102,46 @@ public class SegmentEditor : Editor
         EditorUtility.SetDirty(_segment);
     }
 
-    private void DrawSegment()
+    private void PositionSegmentHandles(SegmentAuthoring segment)
     {
         EditorGUI.BeginChangeCheck();
-        var startWorld = TransformPoint(_segment, _segment.Start);
-        var startTangentWorld = TransformPoint(_segment, _segment.StartTangent);
-        var endTangentWorld = TransformPoint(_segment, _segment.EndTangent);
-        var endWorld = TransformPoint(_segment, _segment.End);
+        var startWorld = TransformPoint(segment, segment.Start);
+        var endWorld = TransformPoint(segment, segment.End);
 
         var newStart = Handles.PositionHandle(startWorld, Quaternion.identity);
-        var newStartTangent = Handles.PositionHandle(startTangentWorld, Quaternion.identity);
-        var newEndTangent = Handles.PositionHandle(endTangentWorld, Quaternion.identity);
         var newEnd = Handles.PositionHandle(endWorld, Quaternion.identity);
-
-        Handles.color = Color.green;
-        Handles.DrawBezier(newStart, newEnd, newStartTangent, newEndTangent, Color.green, null, 3f);
-
-        Handles.SphereHandleCap(0, newStart, Quaternion.identity, 0.5f, EventType.Repaint);
-        Handles.SphereHandleCap(0, newStartTangent, Quaternion.identity, 0.5f, EventType.Repaint);
-        Handles.SphereHandleCap(0, newEndTangent, Quaternion.identity, 0.5f, EventType.Repaint);
-        Handles.SphereHandleCap(0, newEnd, Quaternion.identity, 0.5f, EventType.Repaint);
 
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(_segment, "Move Bezier Handles");
+            Undo.RecordObject(segment, "Move Bezier Handles");
 
-            _segment.Start = InverseTransformPoint(_segment, newStart);
-            _segment.StartTangent = InverseTransformPoint(_segment, newStartTangent);
-            _segment.EndTangent = InverseTransformPoint(_segment, newEndTangent);
-            _segment.End = InverseTransformPoint(_segment, newEnd);
+            segment.Start = InverseTransformPoint(segment, newStart);
+            segment.End = InverseTransformPoint(segment, newEnd);
+
+            var direction = (segment.End - segment.Start).normalized;
+            var length = Vector3.Distance(segment.Start, segment.End) / 3f;
+            segment.StartTangent = segment.Start + direction * length;
+            segment.EndTangent = segment.End - direction * length;
         }
+
+        DrawSegment(segment);
+
     }
 
-    private void DrawSegmentConnections(SegmentAuthoring segment)
+    private static void DrawSegment(SegmentAuthoring segment)
+    {
+        var startWorld = TransformPoint(segment, segment.Start);
+        var startTangentWorld = TransformPoint(segment, segment.StartTangent);
+        var endTangentWorld = TransformPoint(segment, segment.EndTangent);
+        var endWorld = TransformPoint(segment, segment.End);
+
+        Handles.color = Color.green;
+        Handles.DrawLine(endWorld, startWorld);
+    
+        DrawSegmentDirection(startWorld, endWorld);
+    }
+
+    private static void DrawSegmentConnections(SegmentAuthoring segment)
     {
         foreach (var connection in segment.ConnectedSegments)
         {
@@ -139,13 +149,14 @@ public class SegmentEditor : Editor
                 continue;
 
             GenerateTangents(segment, connection);
-            DrawConnection(connection);    
+            DrawConnection(segment, connection);    
         }
     }
 
     private static void GenerateTangents(SegmentAuthoring segment, SegmentAuthoringConnection connection)
     {
-        const float TipsSamplingDistance = 0.025f;
+        // TODO: [MTS-49] use distance between segments to calculate a variable T
+        const float TipsSamplingT = 0.025f;
 
         var segmentA = segment;
         var segmentB = connection.EndPoint;
@@ -160,9 +171,8 @@ public class SegmentEditor : Editor
         var segmentBStartTangent = TransformPoint(segmentB, segmentB.StartTangent);
         var segmentBEndTangent = TransformPoint(segmentB, segmentB.EndTangent);
 
-        var preSegmentAEnd = EvaluateCubicBezier(segmentAStart, segmentAStartTangent, segmentAEndTangent, segmentAEnd, 1 - TipsSamplingDistance);
-        var postSegmentBStart = EvaluateCubicBezier(segmentBStart, segmentBStartTangent, segmentBEndTangent, segmentBEnd, 0 + TipsSamplingDistance);
-
+        var preSegmentAEnd = EvaluateCubicBezier(segmentAStart, segmentAStartTangent, segmentAEndTangent, segmentAEnd, 1 - TipsSamplingT);
+        var postSegmentBStart = EvaluateCubicBezier(segmentBStart, segmentBStartTangent, segmentBEndTangent, segmentBEnd, 0 + TipsSamplingT);
 
         var segmentADirection = (segmentAEnd - preSegmentAEnd).normalized;
         var segmentBDirection = (postSegmentBStart - segmentBStart).normalized;
@@ -175,10 +185,9 @@ public class SegmentEditor : Editor
         connection.EndTangent = InverseTransformPoint(segmentB, endTangent);
     }
 
-
-    private void DrawConnection(SegmentAuthoringConnection connection)
+    private static void DrawConnection(SegmentAuthoring fromSegment, SegmentAuthoringConnection connection)
     {
-        var segmentA = _segment;
+        var segmentA = fromSegment;
         var segmentB = connection.EndPoint;
 
         var segmentAEnd = TransformPoint(segmentA, segmentA.End);
@@ -187,8 +196,8 @@ public class SegmentEditor : Editor
         var endTangent = TransformPoint(segmentB, connection.EndTangent);
 
         Handles.color = Color.yellow;
-        Handles.SphereHandleCap(0, segmentBStart, quaternion.identity, 0.5f, EventType.Repaint); 
         Handles.DrawBezier(segmentAEnd, segmentBStart, startTangent, endTangent, Color.yellow, null, 3f);
+        DrawSegment(segmentB);
     }
 
     private void DrawPreview()
@@ -206,6 +215,12 @@ public class SegmentEditor : Editor
         Handles.color = new Color(1f, 1f, 1f, 0.5f);
         Handles.DrawDottedLine(_pendingStart.Value, previewEnd, 5f);
         SceneView.RepaintAll();
+    }
+
+    private static void DrawSegmentDirection(Vector3 start, Vector3 end)
+    {
+        Handles.color = Color.yellow;
+        Handles.ArrowHandleCap(0, start, Quaternion.LookRotation(end - start), 3, EventType.Repaint);
     }
 
     private static Vector3 EvaluateCubicBezier(float3 p0, float3 p1, float3 p2, float3 p3, float t)
@@ -228,6 +243,13 @@ public class SegmentEditor : Editor
     private static Vector3 TransformPoint(SegmentAuthoring segment, Vector3 localPosition)
     {
         return segment.transform.TransformPoint(localPosition);
+    }
+
+    [DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.Active)]
+    private static void DrawSegmentGizmo(SegmentAuthoring segment, GizmoType gizmoType)
+    {
+        DrawSegment(segment);
+        DrawSegmentConnections(segment);
     }
 }
 #endif

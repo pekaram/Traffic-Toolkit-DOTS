@@ -6,7 +6,6 @@ using Unity.Transforms;
 
 public partial struct AdaptiveSpeedSystem : ISystem
 {
-    private const float MaxSpeed = 20;
     private const float MinimumSpeed = 0.1f;
 
     private const float AcceleratingPower = 100;
@@ -68,9 +67,9 @@ public partial struct AdaptiveSpeedSystem : ISystem
 
         private void Accelerate(ref Vehicle vehicle, float acceleratePower)
         {
-            if (vehicle.Speed >= MaxSpeed)
+            if (vehicle.Speed >= vehicle.MaxSpeed)
             {
-                vehicle.Speed = MaxSpeed;
+                vehicle.Speed = vehicle.MaxSpeed;
             }
             else
             {

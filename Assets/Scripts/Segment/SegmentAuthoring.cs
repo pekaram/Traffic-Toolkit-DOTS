@@ -5,10 +5,14 @@ using Unity.Mathematics;
 
 public class SegmentAuthoring : MonoBehaviour
 {
-    // Bezier p0,p1,p2,p3
     public Vector3 Start;
+
+    [HideInInspector]
     public Vector3 StartTangent;
+
+    [HideInInspector]
     public Vector3 EndTangent;
+
     public Vector3 End;
 
     public TrafficLightAuthoring AssociatedTrafficLight;
@@ -38,6 +42,9 @@ public class SegmentAuthoring : MonoBehaviour
             var connections = AddBuffer<SegmentConnection>(entity);
             foreach (var connection in authoring.ConnectedSegments)
             {
+                if (connection.EndPoint == null)
+                    continue;
+
                 var connectionEntity = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
                 AddComponent(connectionEntity, new Segment
                 {
@@ -64,7 +71,9 @@ public class SegmentAuthoring : MonoBehaviour
 [System.Serializable]
 public class SegmentAuthoringConnection
 {
+    [HideInInspector]
     public Vector3 StartTangent;
+    [HideInInspector]
     public Vector3 EndTangent;
 
     public SegmentAuthoring EndPoint;

@@ -3,8 +3,8 @@ using Unity.Entities;
 
 class VehicleAuthoring : MonoBehaviour
 {
-    public float Speed;
-    public GameObject Lane;
+    public float MaxSpeed;
+    public SegmentAuthoring Segment;
     public float T;
 }
 
@@ -15,8 +15,8 @@ class VehicleBaker : Baker<VehicleAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent(entity, new Vehicle
         {
-            Speed = authoring.Speed,
-            CurrentSegment = GetEntity(authoring.Lane, TransformUsageFlags.None),
+            MaxSpeed = authoring.MaxSpeed,
+            CurrentSegment = GetEntity(authoring.Segment, TransformUsageFlags.None),
             T = authoring.T
         });
     }

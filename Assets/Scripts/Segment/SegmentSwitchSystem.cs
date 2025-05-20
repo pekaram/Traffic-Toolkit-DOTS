@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 
 public partial struct SegmentSwitchSystem : ISystem
 {
@@ -16,19 +15,19 @@ public partial struct SegmentSwitchSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         _connectionLookup.Update(ref state);
-        foreach (var (vehicle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<LocalTransform>>())
+        foreach (var (vehicle, entity) in SystemAPI.Query<RefRW<Vehicle>>().WithEntityAccess())
         {
             if (vehicle.ValueRO.T < 1)
                 continue;
 
-            TrySwitchToNextLane(vehicle, ref state);
+            TrySwitchToNextLane(ref state, vehicle, entity.Index * 100000);
         }
     }
 
     private bool CanSwitchSegment(RefRW<Vehicle> vehicle, ref SystemState state)
     {
         var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
- 
+
         if (segment.AssociatedTrafficLight == Entity.Null)
             return true;
 
@@ -36,7 +35,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return trafficLight.Signal == TrafficLightSignal.Green;
     }
 
-    private bool TrySwitchToNextLane(RefRW<Vehicle> vehicle, ref SystemState state)
+    private bool TrySwitchToNextLane(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
     {
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
             return false;
@@ -44,7 +43,7 @@ public partial struct SegmentSwitchSystem : ISystem
         if (!CanSwitchSegment(vehicle, ref state))
             return false;
 
-        var nextSegment = TrySetNextLane(vehicle, 1);
+        var nextSegment = TrySetNextLane(vehicle, randomSeed);
 
         vehicle.ValueRW.CurrentSegment = nextSegment;
         vehicle.ValueRW.T = 0;
@@ -52,16 +51,15 @@ public partial struct SegmentSwitchSystem : ISystem
         return true;
     }
 
-    private Entity TrySetNextLane(RefRW<Vehicle> vehicle, int index)
+    private Entity TrySetNextLane(RefRW<Vehicle> vehicle, int randomSeed)
     {
         _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentSegment, out var connections);
         if (connections.Length == 0)
             return Entity.Null;
 
-        var random = new Random((uint)index * 100000);
+        var random = new Random((uint)randomSeed);
         var randomIndex = random.NextInt(connections.Length);
 
         return connections[randomIndex].ConnectedSegment;
     }
-
 }

@@ -35,7 +35,6 @@ public class SegmentEditor : Editor
         }
     }
 
-
     private void SyncTrafficLight()
     {
         if (_cachedTrafficLight != null)
@@ -105,11 +104,9 @@ public class SegmentEditor : Editor
     private void PositionSegmentHandles(SegmentAuthoring segment)
     {
         EditorGUI.BeginChangeCheck();
-        var startWorld = TransformPoint(segment, segment.Start);
-        var endWorld = TransformPoint(segment, segment.End);
 
-        var newStart = Handles.PositionHandle(startWorld, Quaternion.identity);
-        var newEnd = Handles.PositionHandle(endWorld, Quaternion.identity);
+        var newStart = Handles.PositionHandle(segment.WorldStart, Quaternion.identity);
+        var newEnd = Handles.PositionHandle(segment.WorldEnd, Quaternion.identity);
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -117,28 +114,22 @@ public class SegmentEditor : Editor
 
             segment.Start = InverseTransformPoint(segment, newStart);
             segment.End = InverseTransformPoint(segment, newEnd);
-
-            var direction = (segment.End - segment.Start).normalized;
-            var length = Vector3.Distance(segment.Start, segment.End) / 3f;
-            segment.StartTangent = segment.Start + direction * length;
-            segment.EndTangent = segment.End - direction * length;
         }
 
-        DrawSegment(segment);
+        var direction = (segment.End - segment.Start).normalized;
+        var length = Vector3.Distance(segment.Start, segment.End) / 3f;
+        segment.StartTangent = segment.Start + direction * length;
+        segment.EndTangent = segment.End - direction * length;
 
+        DrawSegment(segment);
     }
 
     private static void DrawSegment(SegmentAuthoring segment)
     {
-        var startWorld = TransformPoint(segment, segment.Start);
-        var startTangentWorld = TransformPoint(segment, segment.StartTangent);
-        var endTangentWorld = TransformPoint(segment, segment.EndTangent);
-        var endWorld = TransformPoint(segment, segment.End);
-
         Handles.color = Color.green;
-        Handles.DrawLine(endWorld, startWorld);
+        Handles.DrawLine(segment.WorldStart, segment.WorldEnd);
     
-        DrawSegmentDirection(startWorld, endWorld);
+        DrawSegmentDirection(segment.WorldStart, segment.WorldEnd);
     }
 
     private static void DrawSegmentConnections(SegmentAuthoring segment)
@@ -148,41 +139,57 @@ public class SegmentEditor : Editor
             if (connection.EndPoint == null) 
                 continue;
 
-            GenerateTangents(segment, connection);
-            DrawConnection(segment, connection);    
+            var (startTangent, endTangent) = GenerateTangents(segment, connection.EndPoint, connection.fromT, connection.toT);
+            connection.StartTangent = startTangent;
+            connection.EndTangent = endTangent;
+
+            DrawConnection(segment, connection);
         }
     }
 
-    private static void GenerateTangents(SegmentAuthoring segment, SegmentAuthoringConnection connection)
+    /// <summary>
+    /// workload for translating T value linearly based on distance
+    /// </summary>
+    /// <param name="segment"></param>
+    /// <param name="distance"></param>
+    /// <returns></returns>
+    private static float TranslateTLinearly(SegmentAuthoring segment, float distance)
     {
-        // TODO: [MTS-49] use distance between segments to calculate a variable T
+        var totalLength = Vector3.Distance(segment.Start, segment.End);
+        if (totalLength < distance)
+        {
+            Debug.LogError("Segment has zero length, cannot translate T.");
+            return 1;
+        }
+
+        var t = distance / totalLength;
+        return t;
+    }
+
+    private static (Vector3 startTangent, Vector3 endTangent) GenerateTangents(SegmentAuthoring segment, SegmentAuthoring segment2, float aT, float bT)
+    {
+        // TODO: [MTS-49] use distance between segments to calculate a variable T  
         const float TipsSamplingT = 0.025f;
 
         var segmentA = segment;
-        var segmentB = connection.EndPoint;
+        var segmentB = segment2;
+        var connectionStartPosition = EvaluateCubicBezier(segmentA.WorldStart, segmentA.WorldStartTangent, segmentA.WorldEndTangent, segmentA.WorldEnd, aT);
+        var connectionEndPosition = EvaluateCubicBezier(segmentB.WorldStart, segmentB.WorldStartTangent, segmentB.WorldEndTangent, segmentB.WorldEnd, bT);
 
-        var segmentAStart = TransformPoint(segmentA, segmentA.Start);
-        var segmentAEnd = TransformPoint(segmentA, segmentA.End);
-        var segmentAStartTangent = TransformPoint(segmentA, segmentA.StartTangent);
-        var segmentAEndTangent = TransformPoint(segmentA, segmentA.EndTangent);
+        var preSegmentAEnd = EvaluateCubicBezier(segmentA.WorldStart, segmentA.WorldStartTangent, segmentA.WorldEndTangent, segmentA.WorldEnd, aT - TipsSamplingT);
+        var postSegmentBStart = EvaluateCubicBezier(segmentB.WorldStart, segmentB.WorldStartTangent, segmentB.WorldEndTangent, segmentB.WorldEnd, bT + TipsSamplingT);
 
-        var segmentBStart = TransformPoint(segmentB, segmentB.Start);
-        var segmentBEnd = TransformPoint(segmentB, segmentB.End);
-        var segmentBStartTangent = TransformPoint(segmentB, segmentB.StartTangent);
-        var segmentBEndTangent = TransformPoint(segmentB, segmentB.EndTangent);
+        var segmentADirection = (connectionStartPosition - preSegmentAEnd).normalized;
+        var segmentBDirection = (postSegmentBStart - connectionEndPosition).normalized;
 
-        var preSegmentAEnd = EvaluateCubicBezier(segmentAStart, segmentAStartTangent, segmentAEndTangent, segmentAEnd, 1 - TipsSamplingT);
-        var postSegmentBStart = EvaluateCubicBezier(segmentBStart, segmentBStartTangent, segmentBEndTangent, segmentBEnd, 0 + TipsSamplingT);
+        var tangentDistance = Vector3.Distance(connectionStartPosition, connectionEndPosition) / 2f;
+        var startTangent = connectionStartPosition + segmentADirection * tangentDistance;
+        var endTangent = connectionEndPosition - segmentBDirection * tangentDistance;
 
-        var segmentADirection = (segmentAEnd - preSegmentAEnd).normalized;
-        var segmentBDirection = (postSegmentBStart - segmentBStart).normalized;
+        startTangent = InverseTransformPoint(segmentA, startTangent);
+        endTangent = InverseTransformPoint(segmentB, endTangent);
 
-        var tangentDistance = Vector3.Distance(segmentAEnd, segmentBStart) / 2f;
-        var startTangent = segmentAEnd + segmentADirection * tangentDistance;
-        var endTangent = segmentBStart - segmentBDirection * tangentDistance;
-
-        connection.StartTangent = InverseTransformPoint(segmentA, startTangent);
-        connection.EndTangent = InverseTransformPoint(segmentB, endTangent);
+        return (startTangent, endTangent);
     }
 
     private static void DrawConnection(SegmentAuthoring fromSegment, SegmentAuthoringConnection connection)
@@ -190,13 +197,13 @@ public class SegmentEditor : Editor
         var segmentA = fromSegment;
         var segmentB = connection.EndPoint;
 
-        var segmentAEnd = TransformPoint(segmentA, segmentA.End);
-        var segmentBStart = TransformPoint(segmentB, segmentB.Start);
+        var start = EvaluateCubicBezier(segmentA.WorldStart, segmentA.WorldStartTangent, segmentA.WorldEndTangent, segmentA.WorldEnd, connection.fromT);
+        var end = EvaluateCubicBezier(segmentB.WorldStart, segmentB.WorldStartTangent, segmentB.WorldEndTangent, segmentB.WorldEnd, connection.toT);
         var startTangent = TransformPoint(segmentA, connection.StartTangent);
         var endTangent = TransformPoint(segmentB, connection.EndTangent);
 
         Handles.color = Color.yellow;
-        Handles.DrawBezier(segmentAEnd, segmentBStart, startTangent, endTangent, Color.yellow, null, 3f);
+        Handles.DrawBezier(start, end, startTangent, endTangent, Color.yellow, null, 3f);
         DrawSegment(segmentB);
     }
 
@@ -211,7 +218,7 @@ public class SegmentEditor : Editor
         if (!plane.Raycast(ray, out float distance))
             return;
 
-        Vector3 previewEnd = ray.GetPoint(distance);
+        var previewEnd = ray.GetPoint(distance);
         Handles.color = new Color(1f, 1f, 1f, 0.5f);
         Handles.DrawDottedLine(_pendingStart.Value, previewEnd, 5f);
         SceneView.RepaintAll();
@@ -219,6 +226,9 @@ public class SegmentEditor : Editor
 
     private static void DrawSegmentDirection(Vector3 start, Vector3 end)
     {
+        if (start.Equals(end))
+            return; 
+
         Handles.color = Color.yellow;
         Handles.ArrowHandleCap(0, start, Quaternion.LookRotation(end - start), 3, EventType.Repaint);
     }
@@ -245,11 +255,31 @@ public class SegmentEditor : Editor
         return segment.transform.TransformPoint(localPosition);
     }
 
+    private static void UpdateWorldCoordinates(SegmentAuthoring _segment)
+    {
+        _segment.WorldEnd = TransformPoint(_segment, _segment.End);
+        _segment.WorldStart = TransformPoint(_segment, _segment.Start);
+        _segment.WorldStartTangent = TransformPoint(_segment, _segment.StartTangent);
+        _segment.WorldEndTangent = TransformPoint(_segment, _segment.EndTangent);
+
+        foreach (var connection in _segment.ConnectedSegments)
+        {
+            if (connection.EndPoint == null)
+                continue;
+
+            connection.WorldSegment.Start = EvaluateCubicBezier(_segment.WorldStart, _segment.WorldStartTangent, _segment.WorldEndTangent, _segment.WorldEnd, connection.fromT);
+            connection.WorldSegment.StartTangent = TransformPoint(_segment, connection.StartTangent);
+            connection.WorldSegment.EndTangent = TransformPoint(connection.EndPoint, connection.EndTangent);
+            connection.WorldSegment.End = EvaluateCubicBezier(connection.EndPoint.WorldStart, connection.EndPoint.WorldStartTangent, connection.EndPoint.WorldEndTangent, connection.EndPoint.WorldEnd, connection.toT);
+        }
+    }
+
     [DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.Active)]
     private static void DrawSegmentGizmo(SegmentAuthoring segment, GizmoType gizmoType)
     {
         DrawSegment(segment);
         DrawSegmentConnections(segment);
+        UpdateWorldCoordinates(segment);
     }
 }
 #endif

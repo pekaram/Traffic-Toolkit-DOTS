@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Transforms;
 
-public partial struct AdaptiveSpeedSystem : ISystem
+public partial struct ActiveCollisionAvoidanceSystem : ISystem
 {
     private const float MinimumSpeed = 0.1f;
 

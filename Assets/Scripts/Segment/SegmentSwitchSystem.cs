@@ -1,6 +1,5 @@
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 
 public partial struct SegmentSwitchSystem : ISystem
@@ -35,20 +34,20 @@ public partial struct SegmentSwitchSystem : ISystem
 
             if (vehicle.ValueRO.DesiredSpeed > segment.SpeedLimit)
             {
-                TryToSwitchToFasterLane(ref state, vehicle);
+                TryMergeIntoFasterLane(ref state, vehicle);
             }
         }
     }
 
-    private bool CanSwitchSegment(RefRW<Vehicle> vehicle, ref SystemState state)
+    private bool IsWaitingForGreen(RefRW<Vehicle> vehicle, ref SystemState state)
     {
         var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
 
         if (segment.AssociatedTrafficLight == Entity.Null)
-            return true;
+            return false;
 
         var trafficLight = SystemAPI.GetComponent<TrafficLight>(segment.AssociatedTrafficLight);
-        return trafficLight.Signal == TrafficLightSignal.Green;
+        return trafficLight.Signal == TrafficLightSignal.Red;
     }
 
     private bool TrySwitchToNextLane(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
@@ -56,7 +55,7 @@ public partial struct SegmentSwitchSystem : ISystem
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
             return false;
 
-        if (!CanSwitchSegment(vehicle, ref state))
+        if (IsWaitingForGreen(vehicle, ref state))
             return false;
 
         var connectionPoint = GetRandomConnectionPoint(vehicle, randomSeed);
@@ -68,13 +67,13 @@ public partial struct SegmentSwitchSystem : ISystem
 
         var speedLimit = (int)SystemAPI.GetComponent<Segment>(connectionPoint.ConnectedSegmentEntity).SpeedLimit;
         var random = new Random((uint)randomSeed);
-        var desiredSpeed = random.NextInt(speedLimit - 5, speedLimit + 5);
+        var desiredSpeed = random.NextInt(speedLimit - 1, speedLimit + 2);
         vehicle.ValueRW.DesiredSpeed = desiredSpeed;
 
         return true;
     }
 
-    private void TryToSwitchToFasterLane(ref SystemState state, RefRW<Vehicle> mergingVehicle)
+    private void TryMergeIntoFasterLane(ref SystemState state, RefRW<Vehicle> mergingVehicle)
     {
         var connection = GetLeftAdacentConnector(ref state, mergingVehicle.ValueRO);
         if(connection.ConnectedSegmentEntity == Entity.Null)

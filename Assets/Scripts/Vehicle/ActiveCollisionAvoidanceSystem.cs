@@ -1,17 +1,17 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
 public partial struct ActiveCollisionAvoidanceSystem : ISystem
 {
-    private const float MinimumSpeed = 0.1f;
+    public const float CriticalGap = 10;
 
     private const float AcceleratingPower = 10;
-    private const float BrakingPower = 5;
-    
-    public const float CollisionDetectionDistance = 10;
+    private const float BrakingPowerPerSecond = 10;
+   
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -38,14 +38,17 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
             var distanceToColliderTip = aabb.Extents.z;
             var startOffset = distanceToColliderTip + 0.1f;
             var start = transform.Position + transform.Forward() * startOffset;
-            var end = transform.Position + transform.Forward() * CollisionDetectionDistance;
+
+            float brakingDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * BrakingPowerPerSecond);
+            float detectionDistance =  brakingDistance + CriticalGap; 
+            var end = transform.Position + transform.Forward() * detectionDistance;
 
             var colliderCast = new ColliderCastInput(colliderBlob, start, end);
             CollisionWorld.CastCollider(colliderCast, out var hit);
 
             if (hit.Entity != Entity.Null)
             {
-                Brake(ref vehicle, BrakingPower * DeltaTime);
+                Brake(ref vehicle, DeltaTime * BrakingPowerPerSecond);
             }
             else
             {
@@ -54,27 +57,13 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
         }
 
         private void Brake(ref Vehicle vehicle, float brakePower)
-        {
-            if (vehicle.CurrentSpeed < MinimumSpeed)
-            {
-                vehicle.CurrentSpeed = 0;
-            }
-            else
-            {
-                vehicle.CurrentSpeed -= brakePower;
-            }
+        {    
+            vehicle.CurrentSpeed = math.max(0f, vehicle.CurrentSpeed - brakePower);
         }
 
         private void Accelerate(ref Vehicle vehicle, float acceleratePower)
         {
-            if (vehicle.CurrentSpeed >= vehicle.DesiredSpeed)
-            {
-                vehicle.CurrentSpeed = vehicle.DesiredSpeed;
-            }
-            else
-            {
-                vehicle.CurrentSpeed += acceleratePower;
-            }
+            vehicle.CurrentSpeed = math.min(vehicle.DesiredSpeed, vehicle.CurrentSpeed + acceleratePower);
         }
     }
 

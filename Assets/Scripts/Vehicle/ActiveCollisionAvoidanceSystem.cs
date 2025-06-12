@@ -8,8 +8,8 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
 {
     private const float MinimumSpeed = 0.1f;
 
-    private const float AcceleratingPower = 100;
-    private const float BrakingPower = 100;
+    private const float AcceleratingPower = 10;
+    private const float BrakingPower = 5;
     
     public const float CollisionDetectionDistance = 10;
 
@@ -55,25 +55,25 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
 
         private void Brake(ref Vehicle vehicle, float brakePower)
         {
-            if (vehicle.Speed < MinimumSpeed)
+            if (vehicle.CurrentSpeed < MinimumSpeed)
             {
-                vehicle.Speed = 0;
+                vehicle.CurrentSpeed = 0;
             }
             else
             {
-                vehicle.Speed -= brakePower;
+                vehicle.CurrentSpeed -= brakePower;
             }
         }
 
         private void Accelerate(ref Vehicle vehicle, float acceleratePower)
         {
-            if (vehicle.Speed >= vehicle.MaxSpeed)
+            if (vehicle.CurrentSpeed >= vehicle.DesiredSpeed)
             {
-                vehicle.Speed = vehicle.MaxSpeed;
+                vehicle.CurrentSpeed = vehicle.DesiredSpeed;
             }
             else
             {
-                vehicle.Speed += acceleratePower;
+                vehicle.CurrentSpeed += acceleratePower;
             }
         }
     }

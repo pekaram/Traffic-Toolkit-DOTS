@@ -1,9 +1,14 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 
 public partial struct SegmentSwitchSystem : ISystem
 {
+    private const float RequiredGapDistance = 20;
+
+    private const float SegmentSwitchDistance = 0.05f;
+
     private BufferLookup<ConnectionPoint> _connectionLookup;
 
     public void OnCreate(ref SystemState state)
@@ -28,9 +33,8 @@ public partial struct SegmentSwitchSystem : ISystem
                 continue;
             }
 
-            if (vehicle.ValueRO.MaxSpeed > segment.MaxSpeed)
+            if (vehicle.ValueRO.DesiredSpeed > segment.SpeedLimit)
             {
-                // Try to switch to adjacent lane if speed is below max speed
                 TryToSwitchToFasterLane(ref state, vehicle);
             }
         }
@@ -55,19 +59,24 @@ public partial struct SegmentSwitchSystem : ISystem
         if (!CanSwitchSegment(vehicle, ref state))
             return false;
 
-        var connection = GetRandomConnection(vehicle, randomSeed);
-        if (connection.ConnectedSegmentEntity == Entity.Null)
+        var connectionPoint = GetRandomConnectionPoint(vehicle, randomSeed);
+        if (connectionPoint.ConnectedSegmentEntity == Entity.Null)
             return false;
 
-        vehicle.ValueRW.CurrentSegment = connection.ConnectedSegmentEntity;
-        vehicle.ValueRW.T = connection.ConnectedSegmentT;
+        vehicle.ValueRW.CurrentSegment = connectionPoint.ConnectedSegmentEntity;
+        vehicle.ValueRW.T = connectionPoint.ConnectedSegmentT;
+
+        var speedLimit = (int)SystemAPI.GetComponent<Segment>(connectionPoint.ConnectedSegmentEntity).SpeedLimit;
+        var random = new Random((uint)randomSeed);
+        var desiredSpeed = random.NextInt(speedLimit - 5, speedLimit + 5);
+        vehicle.ValueRW.DesiredSpeed = desiredSpeed;
 
         return true;
     }
 
     private void TryToSwitchToFasterLane(ref SystemState state, RefRW<Vehicle> mergingVehicle)
     {
-        var connection = GetLeftAdacentConnector(mergingVehicle.ValueRO);
+        var connection = GetLeftAdacentConnector(ref state, mergingVehicle.ValueRO);
         if(connection.ConnectedSegmentEntity == Entity.Null)
             return;
 
@@ -75,7 +84,6 @@ public partial struct SegmentSwitchSystem : ISystem
         if (!hasGap)
             return;
 
-        //
         mergingVehicle.ValueRW.CurrentSegment = connection.ConnectedSegmentEntity;
         mergingVehicle.ValueRW.T = connection.ConnectedSegmentT;
     }
@@ -87,36 +95,36 @@ public partial struct SegmentSwitchSystem : ISystem
         var connectionEnd = connectionEndpoints[0];
         var newSegment = SystemAPI.GetComponent<Segment>(connectionEnd.ConnectedSegmentEntity);
 
+        var vehicleSegment = SystemAPI.GetComponent<Segment>(mergingVehicle.CurrentSegment);
+
         foreach (var otherVehicle in SystemAPI.Query<RefRO<Vehicle>>())
         {
             if (!connectionEnd.ConnectedSegmentEntity.Equals(otherVehicle.ValueRO.CurrentSegment))
                 continue;
 
-            var mergingSpeed = mergingVehicle.MaxSpeed;
+            var mergingSpeed = mergingVehicle.DesiredSpeed;
             var start = EvaluateCubicBezier(connectorSegment, 0);
             var destination = EvaluateCubicBezier(connectorSegment, 1);
+            var direction = math.normalize(destination - start);
             var travelDistance = math.distance(destination, start);
             var travelTime = travelDistance / mergingSpeed;
 
-            var predictedOtherVehicleT = TranslateT(newSegment, otherVehicle.ValueRO.T, otherVehicle.ValueRO.Speed * travelTime);
-
-
-            UnityEngine.Debug.LogError(
-                $"Found other vehicle in the way. predictedOtherVehicleT={predictedOtherVehicleT}, " +
-                $"connectionStart.TransitionT={connectionStart.TransitionT}, " +
-                $"connectionEnd.ConnectedSegmentT={connectionEnd.ConnectedSegmentT}"
-            );
-
-            if (predictedOtherVehicleT < connectionEnd.ConnectedSegmentT)
+            var predictedOtherVehicleT = TranslateT(newSegment, otherVehicle.ValueRO.T, otherVehicle.ValueRO.CurrentSpeed * travelTime);
+            var predictedOtherVehiclePosition = EvaluateCubicBezier(newSegment, predictedOtherVehicleT); 
+            if (math.distance(destination, predictedOtherVehiclePosition) < RequiredGapDistance)
+            {
                 return false;
+            }
         }
 
         return true;
     }
 
-    private ConnectionPoint GetLeftAdacentConnector(Vehicle vehicle)
+    private ConnectionPoint GetLeftAdacentConnector(ref SystemState state, Vehicle vehicle)
     {
         _connectionLookup.TryGetBuffer(vehicle.CurrentSegment, out var connections);
+        var vehicleSegment = SystemAPI.GetComponent<Segment>(vehicle.CurrentSegment);
+
         if (connections.Length == 0)
             return default;
 
@@ -126,10 +134,12 @@ public partial struct SegmentSwitchSystem : ISystem
             if (connection.Type != 1)
                 continue;
 
-            if (connection.TransitionT > vehicle.T)
-                continue;
+            var distanceToMergingPoint = math.distance(
+                EvaluateCubicBezier(vehicleSegment, vehicle.T),
+                EvaluateCubicBezier(vehicleSegment, connection.TransitionT));
 
-            // Check distance  
+            if (distanceToMergingPoint > SegmentSwitchDistance)
+                continue;
 
             // Assumes buffer is sorted by T, rest of the connections are >= T
             return connection;
@@ -138,7 +148,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return default;
     }
 
-    private ConnectionPoint GetRandomConnection(RefRW<Vehicle> vehicle, int randomSeed)
+    private ConnectionPoint GetRandomConnectionPoint(RefRW<Vehicle> vehicle, int randomSeed)
     {
         _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentSegment, out var connections);
         if (connections.Length == 0)
@@ -161,7 +171,7 @@ public partial struct SegmentSwitchSystem : ISystem
 
     private static float TranslateT(Segment segment, float t, float targetDistance)
     {
-        const int steps = 1000;
+        const int steps = 100;
         var newPosition = EvaluateCubicBezier(segment, t);
         var oldPosition = newPosition;
         for (var step = t * steps; step <= steps + 1; step += 1)
@@ -196,7 +206,7 @@ public partial struct SegmentSwitchSystem : ISystem
         var p2 = segment.EndTangent;
         var p3 = segment.End;
 
-        float u = 1 - t;
+        var u = 1 - t;
         return
             u * u * u * p0 +
             3 * u * u * t * p1 +

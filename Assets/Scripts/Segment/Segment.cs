@@ -12,7 +12,7 @@ public struct Segment : IComponentData
 
     // Traffic Data
     public Entity AssociatedTrafficLight;
-    public float MaxSpeed;
+    public float SpeedLimit;
 }
 
 public struct ConnectionPoint : IBufferElementData

@@ -50,7 +50,6 @@ public class SegmentEditor : Editor
         _cachedTrafficLight = _segment.AssociatedTrafficLight;
     }
 
-
     private void HandleInput(Event e)
     {
         if (_pendingStart != null &&  e.keyCode == KeyCode.Escape)
@@ -227,7 +226,7 @@ public class SegmentEditor : Editor
     private static void DrawSegmentDirection(Vector3 start, Vector3 end)
     {
         if (start.Equals(end))
-            return; 
+            return;
 
         Handles.color = Color.yellow;
         Handles.ArrowHandleCap(0, start, Quaternion.LookRotation(end - start), 3, EventType.Repaint);

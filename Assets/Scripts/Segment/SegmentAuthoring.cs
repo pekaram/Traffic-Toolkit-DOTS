@@ -27,7 +27,7 @@ public class SegmentAuthoring : MonoBehaviour
     [HideInInspector]
     public Vector3 WorldEndTangent;
 
-    public float MaxSpeed;
+    public float SpeedLimit;
 
     public TrafficLightAuthoring AssociatedTrafficLight;
 
@@ -51,7 +51,7 @@ public class SegmentAuthoring : MonoBehaviour
                 EndTangent = authoring.WorldEndTangent,
                 End = authoring.WorldEnd,
                 AssociatedTrafficLight = trafficLightEntity,
-                MaxSpeed = authoring.MaxSpeed,
+                SpeedLimit = authoring.SpeedLimit,
             });
 
             var connectionPoints = AddBuffer<ConnectionPoint>(segmentEntity);
@@ -66,7 +66,8 @@ public class SegmentAuthoring : MonoBehaviour
                     Start = connection.WorldSegment.Start,
                     StartTangent = connection.WorldSegment.StartTangent,
                     EndTangent = connection.WorldSegment.EndTangent,
-                    End = connection.WorldSegment.End
+                    End = connection.WorldSegment.End,
+                    SpeedLimit = connection.EndPoint.SpeedLimit,
                 });
 
                 var startPoint = new ConnectionPoint { ConnectedSegmentEntity = connectionEntity, TransitionT = connection.fromT, ConnectedSegmentT = 0, Type = connection.Type };

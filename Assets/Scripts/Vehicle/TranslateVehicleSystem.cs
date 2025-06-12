@@ -35,7 +35,7 @@ public partial struct TranslateVehicleSystem : ISystem
 
         void Execute(ref Vehicle vehicle, ref LocalTransform transform)
         {
-            if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f || vehicle.Speed == 0)
+            if (vehicle.CurrentSegment == Entity.Null || vehicle.T >= 1f || vehicle.CurrentSpeed == 0)
                 return;
 
             if (!SegmentLookup.TryGetComponent(vehicle.CurrentSegment, out var segment))
@@ -43,7 +43,7 @@ public partial struct TranslateVehicleSystem : ISystem
 
             transform.Position = EvaluateCubicBezier(segment, vehicle.T);
 
-            vehicle.T = TranslateT(segment, vehicle.T, vehicle.Speed * DeltaTime);
+            vehicle.T = TranslateT(segment, vehicle.T, vehicle.CurrentSpeed * DeltaTime);
             var newPos = EvaluateCubicBezier(segment, vehicle.T);
             var direction = math.normalize(newPos - transform.Position);
             var targetRotation = quaternion.LookRotationSafe(direction, math.up());

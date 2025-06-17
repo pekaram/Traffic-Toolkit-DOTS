@@ -39,23 +39,9 @@ public partial struct SegmentSwitchSystem : ISystem
         }
     }
 
-    private bool IsWaitingForGreen(RefRW<Vehicle> vehicle, ref SystemState state)
-    {
-        var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
-
-        if (segment.AssociatedTrafficLight == Entity.Null)
-            return false;
-
-        var trafficLight = SystemAPI.GetComponent<TrafficLight>(segment.AssociatedTrafficLight);
-        return trafficLight.Signal == TrafficLightSignal.Red;
-    }
-
     private bool TrySwitchToNextLane(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
     {
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
-            return false;
-
-        if (IsWaitingForGreen(vehicle, ref state))
             return false;
 
         var connectionPoint = GetRandomConnectionPoint(vehicle, randomSeed);
@@ -64,12 +50,6 @@ public partial struct SegmentSwitchSystem : ISystem
 
         vehicle.ValueRW.CurrentSegment = connectionPoint.ConnectedSegmentEntity;
         vehicle.ValueRW.T = connectionPoint.ConnectedSegmentT;
-
-        var speedLimit = (int)SystemAPI.GetComponent<Segment>(connectionPoint.ConnectedSegmentEntity).SpeedLimit;
-        var random = new Random((uint)randomSeed);
-        var desiredSpeed = random.NextInt(speedLimit - 1, speedLimit + 2);
-        vehicle.ValueRW.DesiredSpeed = desiredSpeed;
-
         return true;
     }
 

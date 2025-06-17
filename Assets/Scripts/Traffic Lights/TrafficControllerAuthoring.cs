@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Rendering;
 using UnityEngine;
 
 public class TrafficControllerAuthoring : MonoBehaviour
@@ -26,11 +24,11 @@ public class TrafficControllerBaker : Baker<TrafficControllerAuthoring>
             YellowSignalPercentage = authoring.YellowSignalPercentage,
         });
 
-        var controlledTrafficLights = AddBuffer<ControlledTrafficLight>(entity);
+        var controlledTrafficLights = AddBuffer<TrafficLightBufferElement>(entity);
         foreach (var controlledTrafficLight in authoring.ControlledTrafficLights)
         {
             var trafficLightEntitiy = GetEntity(controlledTrafficLight, TransformUsageFlags.None);
-            controlledTrafficLights.Add(new ControlledTrafficLight { Entity = trafficLightEntitiy });
+            controlledTrafficLights.Add(new TrafficLightBufferElement { TrafficLightEntity = trafficLightEntitiy });
         }
     }
 }

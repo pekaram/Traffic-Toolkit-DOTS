@@ -52,7 +52,7 @@ public partial struct TranslateVehicleSystem : ISystem
             transform.Position = newPos;
         }
 
-        private static float TranslateT(Segment segment, float t, float targetDistance)
+        public static float TranslateT(Segment segment, float t, float targetDistance)
         {
             const int steps = 1000;
             var newPosition = EvaluateCubicBezier(segment, t);
@@ -82,7 +82,7 @@ public partial struct TranslateVehicleSystem : ISystem
             return t;
         }
 
-        private static float3 EvaluateCubicBezier(Segment segment, float t)
+        public static float3 EvaluateCubicBezier(Segment segment, float t)
         {
             var p0 = segment.Start;
             var p1 = segment.StartTangent;

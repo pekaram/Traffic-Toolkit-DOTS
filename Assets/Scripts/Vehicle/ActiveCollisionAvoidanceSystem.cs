@@ -10,8 +10,7 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
     public const float CriticalGap = 10;
 
     private const float AcceleratingPower = 10;
-    private const float BrakingPowerPerSecond = 10;
-   
+    public const float BrakingPowerPerSecond = 10; 
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -20,8 +19,8 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
         var collisionWorld = physicsWorldSystem.CollisionWorld;
         var deltaTime = SystemAPI.Time.DeltaTime;
 
-        var controlVehcileSpeed = new ControlVehicleSpeed() { CollisionWorld = collisionWorld, DeltaTime = deltaTime };
-        controlVehcileSpeed.ScheduleParallel();
+        var controlVehicleSpeed = new ControlVehicleSpeed() { CollisionWorld = collisionWorld, DeltaTime = deltaTime };
+        controlVehicleSpeed.ScheduleParallel();
     }
 
     [BurstCompile]
@@ -39,29 +38,33 @@ public partial struct ActiveCollisionAvoidanceSystem : ISystem
             var startOffset = distanceToColliderTip + 0.1f;
             var start = transform.Position + transform.Forward() * startOffset;
 
-            float brakingDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * BrakingPowerPerSecond);
-            float detectionDistance =  brakingDistance + CriticalGap; 
+            var brakingDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * BrakingPowerPerSecond);
+            var detectionDistance =  brakingDistance + CriticalGap; 
             var end = transform.Position + transform.Forward() * detectionDistance;
 
             var colliderCast = new ColliderCastInput(colliderBlob, start, end);
             CollisionWorld.CastCollider(colliderCast, out var hit);
 
-            if (hit.Entity != Entity.Null)
+            if (hit.Entity != Entity.Null || vehicle.CurrentSpeed > vehicle.DesiredSpeed)
             {
-                Brake(ref vehicle, DeltaTime * BrakingPowerPerSecond);
+                BrakeToAvoidTrafficAhead(ref vehicle, DeltaTime * BrakingPowerPerSecond);
             }
             else
             {
-                Accelerate(ref vehicle, AcceleratingPower * DeltaTime);
+
+                AccelerateIfClearAhead(ref vehicle, AcceleratingPower * DeltaTime);
             }
+
+            // Segment Look up before acceleration 
+            // if has enough road accelerate 
         }
 
-        private void Brake(ref Vehicle vehicle, float brakePower)
+        private void BrakeToAvoidTrafficAhead(ref Vehicle vehicle, float brakePower)
         {    
             vehicle.CurrentSpeed = math.max(0f, vehicle.CurrentSpeed - brakePower);
         }
 
-        private void Accelerate(ref Vehicle vehicle, float acceleratePower)
+        private void AccelerateIfClearAhead(ref Vehicle vehicle, float acceleratePower)
         {
             vehicle.CurrentSpeed = math.min(vehicle.DesiredSpeed, vehicle.CurrentSpeed + acceleratePower);
         }

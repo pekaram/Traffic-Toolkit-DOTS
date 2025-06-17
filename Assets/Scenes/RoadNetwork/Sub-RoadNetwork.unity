@@ -606,7 +606,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4367912832611735569, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -765,7 +765,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 10.000002, y: 15.87, z: 10.000002}
   m_Center: {x: 0, y: 0, z: 0.0000076293945}
@@ -960,7 +960,7 @@ MonoBehaviour:
   WorldEnd: {x: -146.90001, y: 0, z: 15.000004}
   WorldStartTangent: {x: -58.66967, y: 0, z: 14.999996}
   WorldEndTangent: {x: -102.784836, y: 0, z: 15.000001}
-  SpeedLimit: 8
+  SpeedLimit: 40
   AssociatedTrafficLight: {fileID: 0}
   ConnectedSegments: []
 --- !u!1 &664881102 stripped
@@ -1233,7 +1233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 50
+  MaxSpeed: 25
   Segment: {fileID: 1643880613}
   T: 0
 --- !u!1001 &1065363185
@@ -1631,41 +1631,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e585f33886d670419a99071c9354b1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Start: {x: 0, y: 0, z: 93.012184}
-  StartTangent: {x: -0.023333333, y: 0, z: 62.53609}
-  EndTangent: {x: -0.046666667, y: 0, z: 32.05999}
-  End: {x: -0.07, y: 0, z: 1.583897}
-  WorldStart: {x: 5, y: 0, z: -107.61218}
-  WorldEnd: {x: 5.07, y: 0, z: -16.183897}
-  WorldStartTangent: {x: 5.0233335, y: 0, z: -77.13609}
-  WorldEndTangent: {x: 5.0466666, y: 0, z: -46.65999}
-  SpeedLimit: 0
-  AssociatedTrafficLight: {fileID: 0}
+  Start: {x: 2.4616165, y: 0, z: 260.11703}
+  StartTangent: {x: 1.9404831, y: 0, z: 173.96469}
+  EndTangent: {x: 1.4193497, y: 0, z: 87.81235}
+  End: {x: 0.89821625, y: 0, z: 1.66}
+  WorldStart: {x: 2.5383835, y: 0, z: -274.71704}
+  WorldEnd: {x: 4.1017838, y: 0, z: -16.26}
+  WorldStartTangent: {x: 3.059517, y: 0, z: -188.5647}
+  WorldEndTangent: {x: 3.5806503, y: 0, z: -102.412346}
+  SpeedLimit: 25
+  AssociatedTrafficLight: {fileID: 923615428}
   ConnectedSegments:
   - fromT: 1
     toT: 0
-    StartTangent: {x: -0.08092117, y: 0, z: -12.68024}
-    EndTangent: {x: 0.8665558, y: 0, z: 104.70435}
+    StartTangent: {x: 0.81375074, y: 0, z: -12.303591}
+    EndTangent: {x: 0.52371794, y: 0, z: 104.40928}
     WorldSegment:
       Start:
-        x: 5.07
+        x: 4.1017838
         y: 0
-        z: -16.183897
+        z: -16.26
       StartTangent:
-        x: 5.080921
+        x: 4.1862493
         y: 0
-        z: -1.9197607
+        z: -2.2964096
       EndTangent:
-        x: -0.2956314
+        x: -0.5907059
         y: 0
-        z: 4.1334305
+        z: 4.476265
       End:
         x: -14.554504
         y: 0
         z: 4.5221786
       SpeedLimit: 0
-    EndPoint: {fileID: 1294516585}
-    Type: 0
+    EndPoint: {fileID: 1886158838}
+    Type: 1
 --- !u!1001 &1675594028
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1720,7 +1720,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4367912832611735569, guid: 23ca5df616161f943a238cea6bc72dfc, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1754,7 +1754,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxSpeed: 3
   Segment: {fileID: 1886158838}
-  T: 0.1
+  T: 0.2
 --- !u!4 &1680217821 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6916150628897145, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
@@ -2001,7 +2001,7 @@ MonoBehaviour:
   WorldEnd: {x: -146.90001, y: 0, z: 4.9573097}
   WorldStartTangent: {x: -58.66967, y: 0, z: 4.667221}
   WorldEndTangent: {x: -102.784836, y: 0, z: 4.8122644}
-  SpeedLimit: 3
+  SpeedLimit: 8
   AssociatedTrafficLight: {fileID: 0}
   ConnectedSegments:
   - fromT: 0.13
@@ -2051,7 +2051,7 @@ MonoBehaviour:
         z: 15
       SpeedLimit: 0
     EndPoint: {fileID: 630557041}
-    Type: 1
+    Type: 2
   - fromT: 0.49
     toT: 0.83
     StartTangent: {x: 0.18873432, y: 0, z: 2.5196383}
@@ -2258,32 +2258,6 @@ MonoBehaviour:
   MaxSpeed: 10
   Segment: {fileID: 630557041}
   T: 0
---- !u!1 &1992938006 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2422113578945349670, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
-  m_PrefabInstance: {fileID: 1413484609141527559}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &1992938010
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1992938006}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 10, y: 8.03, z: 10}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &2092564884 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1349891040625449522, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
@@ -3206,9 +3180,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2978514971542907214, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1643880613}
-    - targetCorrespondingSourceObject: {fileID: 2422113578945349670, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1992938010}
     - targetCorrespondingSourceObject: {fileID: 1047278189792944079, guid: 576bd0034013cd8499c3e2b45d712aac, type: 3}
       insertIndex: -1
       addedObject: {fileID: 275918528}

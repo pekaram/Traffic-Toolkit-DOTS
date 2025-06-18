@@ -743,32 +743,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8436733521334544454, guid: 4bbd9174d59f1d543ba07d73404d1728, type: 3}
   m_PrefabInstance: {fileID: 462929661}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &541486154 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6743241502225443752, guid: 08a7262adcae8e64a92af8999ade68e1, type: 3}
-  m_PrefabInstance: {fileID: 1886158835}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &541486158
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 541486154}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Size: {x: 10.000002, y: 15.87, z: 10.000002}
-  m_Center: {x: 0, y: 0, z: 0.0000076293945}
 --- !u!1001 &630557038
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1645,28 +1619,28 @@ MonoBehaviour:
   ConnectedSegments:
   - fromT: 1
     toT: 0
-    StartTangent: {x: 0.81375074, y: 0, z: -12.303591}
-    EndTangent: {x: 0.52371794, y: 0, z: 104.40928}
+    StartTangent: {x: 0.7881155, y: 0, z: -16.541618}
+    EndTangent: {x: 0.0000019073486, y: 0, z: 108.64746}
     WorldSegment:
       Start:
         x: 4.1017838
         y: 0
         z: -16.26
       StartTangent:
-        x: 4.1862493
+        x: 4.2118845
         y: 0
-        z: -2.2964096
+        z: 1.941618
       EndTangent:
-        x: -0.5907059
+        x: 3.6474762
         y: 0
-        z: 4.476265
+        z: 14.999985
       End:
         x: -14.554504
         y: 0
-        z: 4.5221786
+        z: 14.999992
       SpeedLimit: 0
       IsDeadEnd: 0
-    EndPoint: {fileID: 1886158838}
+    EndPoint: {fileID: 630557041}
     Type: 0
 --- !u!1001 &1675594028
 PrefabInstance:
@@ -1970,9 +1944,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2301310087594205690, guid: 08a7262adcae8e64a92af8999ade68e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1886158838}
-    - targetCorrespondingSourceObject: {fileID: 6743241502225443752, guid: 08a7262adcae8e64a92af8999ade68e1, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 541486158}
   m_SourcePrefab: {fileID: 100100000, guid: 08a7262adcae8e64a92af8999ade68e1, type: 3}
 --- !u!4 &1886158836 stripped
 Transform:

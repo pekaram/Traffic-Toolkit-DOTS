@@ -39,7 +39,6 @@ public partial struct SpeedControlSystem : ISystem
             }
             else
             {
-
                 Accelerate(ref vehicle, AcceleratingPower * DeltaTime);
             }
         }

@@ -13,6 +13,7 @@ public struct Segment : IComponentData
     // Traffic Data
     public Entity AssociatedTrafficLight;
     public float SpeedLimit;
+    public bool IsDeadEnd;
 }
 
 public struct ConnectionPoint : IBufferElementData
@@ -22,5 +23,12 @@ public struct ConnectionPoint : IBufferElementData
     public Entity ConnectedSegmentEntity;
     public float ConnectedSegmentT;
 
-    public int Type; // 0 = Intersection, 1 = LeftAdjacent, 2 = RightAdacent
+    public ConnectionType Type; // 0 = Intersection, 1 = LeftAdjacent, 2 = RightAdacent
+}
+
+public enum ConnectionType
+{
+    Intersection = 0,
+    LeftAdjacent = 1,
+    RightAdjacent = 2
 }

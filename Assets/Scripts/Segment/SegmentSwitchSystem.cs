@@ -32,13 +32,13 @@ public partial struct SegmentSwitchSystem : ISystem
                 continue;
             }
 
-            if (vehicle.ValueRO.DesiredSpeed > segment.SpeedLimit)
+            if (vehicle.ValueRO.SpeedToReach > segment.SpeedLimit)
             {
                 TryMergeIntoFasterLane(ref state, vehicle);
             }
         }
     }
-
+    
     private bool TrySwitchToNextLane(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
     {
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
@@ -81,7 +81,7 @@ public partial struct SegmentSwitchSystem : ISystem
             if (!connectionEnd.ConnectedSegmentEntity.Equals(otherVehicle.ValueRO.CurrentSegment))
                 continue;
 
-            var mergingSpeed = mergingVehicle.DesiredSpeed;
+            var mergingSpeed = mergingVehicle.SpeedToReach;
             var start = EvaluateCubicBezier(connectorSegment, 0);
             var destination = EvaluateCubicBezier(connectorSegment, 1);
             var direction = math.normalize(destination - start);
@@ -110,7 +110,7 @@ public partial struct SegmentSwitchSystem : ISystem
         for (var i = 0; i < connections.Length; i++)
         {
             var connection = connections[i];
-            if (connection.Type != 1)
+            if (connection.Type != ConnectionType.LeftAdjacent)
                 continue;
 
             var distanceToMergingPoint = math.distance(

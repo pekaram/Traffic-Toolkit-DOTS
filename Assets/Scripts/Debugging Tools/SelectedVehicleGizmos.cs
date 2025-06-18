@@ -46,7 +46,7 @@ public static class SelectedVehicleGizmos
         // TODO: [MTS-41] Collision Debugging Gizmos should get fed data from collision avoidance system
         var collider = EntityManager.GetComponentData<PhysicsCollider>(SelectedVehicleEntity);
         var boundingBox = collider.Value.Value.CalculateAabb();
-        DrawRaycastLine(boundingBox, transform.Position, transform.Forward, ActiveCollisionAvoidanceSystem.CriticalGap);
+        DrawRaycastLine(boundingBox, transform.Position, transform.Forward, SpeedControlSystem.CriticalGap);
         DrawBoundingBox(boundingBox, transform.Position, transform.Rotation);
     }
 

@@ -52,6 +52,7 @@ public class SegmentAuthoring : MonoBehaviour
                 End = authoring.WorldEnd,
                 AssociatedTrafficLight = trafficLightEntity,
                 SpeedLimit = authoring.SpeedLimit,
+                IsDeadEnd = !authoring.ConnectedSegments.Any(segment => segment.Type == ConnectionType.Intersection)
             });
 
             var connectionPoints = AddBuffer<ConnectionPoint>(segmentEntity);
@@ -68,6 +69,7 @@ public class SegmentAuthoring : MonoBehaviour
                     EndTangent = connection.WorldSegment.EndTangent,
                     End = connection.WorldSegment.End,
                     SpeedLimit = connection.EndPoint.SpeedLimit,
+                    IsDeadEnd = false
                 });
 
                 var startPoint = new ConnectionPoint { ConnectedSegmentEntity = connectionEntity, TransitionT = connection.fromT, ConnectedSegmentT = 0, Type = connection.Type };
@@ -75,7 +77,7 @@ public class SegmentAuthoring : MonoBehaviour
 
                 var endpointConnection = AddBuffer<ConnectionPoint>(connectionEntity);
                 var connectedSegmentEntity = GetEntity(connection.EndPoint, TransformUsageFlags.None);
-                endpointConnection.Add(new ConnectionPoint { ConnectedSegmentEntity = connectedSegmentEntity, ConnectedSegmentT = connection.toT, TransitionT = 1, Type = 0 });         
+                endpointConnection.Add(new ConnectionPoint { ConnectedSegmentEntity = connectedSegmentEntity, ConnectedSegmentT = connection.toT, TransitionT = 1, Type = ConnectionType.Intersection });         
             }
         }
     }
@@ -99,5 +101,5 @@ public class SegmentAuthoringConnection
 
     public SegmentAuthoring EndPoint;
 
-    public int Type; // 0 = Intersection, 1 = LeftAdjacent, 2 = RightAdacent
+    public ConnectionType Type;
 }

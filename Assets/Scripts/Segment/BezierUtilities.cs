@@ -1,4 +1,5 @@
 ﻿using Unity.Mathematics;
+using UnityEngine;
 
 namespace Bezier
 {
@@ -32,6 +33,29 @@ namespace Bezier
 
             UnityEngine.Debug.LogError("Failed to Translate T");
             return t;
+        }
+
+        public static Vector3 EvaluateCubicBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+        {
+            float u = 1 - t;
+            return u * u * u * p0 +
+                   3 * u * u * t * p1 +
+                   3 * u * t * t * p2 +
+                   t * t * t * p3;
+        }
+
+        public static Vector3 EvaluateCubicBezier(SegmentAuthoring segment, float t)
+        {
+            var p0 = segment.Start;
+            var p1 = segment.StartTangent;
+            var p2 = segment.EndTangent;
+            var p3 = segment.End;
+
+            float u = 1 - t;
+            return u * u * u * p0 +
+                   3 * u * u * t * p1 +
+                   3 * u * t * t * p2 +
+                   t * t * t * p3;
         }
 
         public static float3 EvaluateCubicBezier(Segment segment, float t)

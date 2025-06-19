@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/RoadNetwork.unity
+    path: Assets/Scenes/Demo Scene/DemoScene.unity
     guid: ce2d6da3080f5d94595a6c4e998ae00b
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

@@ -638,7 +638,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 8
+  DriverSpeedBias: 1
   Segment: {fileID: 1886158838}
   T: 0
 --- !u!1001 &462929661
@@ -1051,7 +1051,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 10
+  DriverSpeedBias: 1
   Segment: {fileID: 630557041}
   T: 0
 --- !u!114 &923615428 stripped
@@ -1207,7 +1207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 25
+  DriverSpeedBias: 1.25
   Segment: {fileID: 1643880613}
   T: 0
 --- !u!1001 &1065363185
@@ -1619,28 +1619,28 @@ MonoBehaviour:
   ConnectedSegments:
   - fromT: 1
     toT: 0
-    StartTangent: {x: 0.7881155, y: 0, z: -16.541618}
-    EndTangent: {x: 0.0000019073486, y: 0, z: 108.64746}
+    StartTangent: {x: 0.81375074, y: 0, z: -12.303591}
+    EndTangent: {x: 0.52371794, y: 0, z: 104.40928}
     WorldSegment:
       Start:
         x: 4.1017838
         y: 0
         z: -16.26
       StartTangent:
-        x: 4.2118845
+        x: 4.1862493
         y: 0
-        z: 1.941618
+        z: -2.2964096
       EndTangent:
-        x: 3.6474762
+        x: -0.5907059
         y: 0
-        z: 14.999985
+        z: 4.476265
       End:
         x: -14.554504
         y: 0
-        z: 14.999992
+        z: 4.5221786
       SpeedLimit: 0
       IsDeadEnd: 0
-    EndPoint: {fileID: 630557041}
+    EndPoint: {fileID: 1886158838}
     Type: 0
 --- !u!1001 &1675594028
 PrefabInstance:
@@ -1728,7 +1728,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 3
+  DriverSpeedBias: 1
   Segment: {fileID: 1886158838}
   T: 0.2
 --- !u!4 &1680217821 stripped
@@ -2232,7 +2232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 10
+  DriverSpeedBias: 1
   Segment: {fileID: 630557041}
   T: 0
 --- !u!4 &2092564884 stripped
@@ -2326,7 +2326,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4623771c368ab0d429e2d1e3834f885f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 10
+  DriverSpeedBias: 1
   Segment: {fileID: 630557041}
   T: 0.11
 --- !u!4 &2144091424 stripped

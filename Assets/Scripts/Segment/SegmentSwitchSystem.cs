@@ -29,23 +29,29 @@ public partial struct SegmentSwitchSystem : ISystem
 
             if (vehicle.ValueRO.T >= 1)
             {
-                TrySwitchToNextLane(ref state, vehicle, entity.Index * 100000);
+                TryEnterNext(ref state, vehicle, entity.Index * 100000);
                 continue;
             }
 
-            if (vehicle.ValueRO.SpeedToReach > segment.SpeedLimit)
+            if (vehicle.ValueRO.DriverSpeedBias > 1)
             {
-                TryMergeIntoFasterLane(ref state, vehicle);
+                TryChangeToAdjacent(ref state, vehicle, ConnectionType.LeftAdjacent);
+                continue;
+            }
+
+            if (vehicle.ValueRO.DriverSpeedBias < 0.9f)
+            {
+                TryChangeToAdjacent(ref state, vehicle, ConnectionType.RightAdjacent);
             }
         }
     }
     
-    private bool TrySwitchToNextLane(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
+    private bool TryEnterNext(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
     {
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
             return false;
 
-        var connectionPoint = GetRandomConnectionPoint(vehicle, randomSeed);
+        var connectionPoint = GetRandomIntersectionPoint(vehicle, randomSeed);
         if (connectionPoint.ConnectedSegmentEntity == Entity.Null)
             return false;
 
@@ -54,13 +60,13 @@ public partial struct SegmentSwitchSystem : ISystem
         return true;
     }
 
-    private void TryMergeIntoFasterLane(ref SystemState state, RefRW<Vehicle> mergingVehicle)
+    private void TryChangeToAdjacent(ref SystemState state, RefRW<Vehicle> mergingVehicle, ConnectionType direction)
     {
-        var connection = GetLeftAdacentConnector(ref state, mergingVehicle.ValueRO);
+        var connection = GetNearestAdjacentPoint(ref state, mergingVehicle.ValueRO, direction);
         if(connection.ConnectedSegmentEntity == Entity.Null)
             return;
 
-        var hasGap = FindGap(ref state, mergingVehicle.ValueRO, connection);
+        var hasGap = HasEnoughGap(ref state, mergingVehicle.ValueRO, connection);
         if (!hasGap)
             return;
 
@@ -68,7 +74,7 @@ public partial struct SegmentSwitchSystem : ISystem
         mergingVehicle.ValueRW.T = connection.ConnectedSegmentT;
     }
 
-    private bool FindGap(ref SystemState state, Vehicle mergingVehicle, in ConnectionPoint connectionStart)
+    private bool HasEnoughGap(ref SystemState state, in Vehicle mergingVehicle, in ConnectionPoint connectionStart)
     {
         var connectorSegment = SystemAPI.GetComponent<Segment>(connectionStart.ConnectedSegmentEntity);
         _connectionLookup.TryGetBuffer(connectionStart.ConnectedSegmentEntity, out var connectionEndpoints);
@@ -92,15 +98,13 @@ public partial struct SegmentSwitchSystem : ISystem
             var predictedOtherVehicleT = BezierUtilities.TranslateT(newSegment, otherVehicle.ValueRO.T, otherVehicle.ValueRO.CurrentSpeed * travelTime);
             var predictedOtherVehiclePosition = BezierUtilities.EvaluateCubicBezier(newSegment, predictedOtherVehicleT); 
             if (math.distance(destination, predictedOtherVehiclePosition) < RequiredGapDistance)
-            {
                 return false;
-            }
         }
 
         return true;
     }
 
-    private ConnectionPoint GetLeftAdacentConnector(ref SystemState state, Vehicle vehicle)
+    private ConnectionPoint GetNearestAdjacentPoint(ref SystemState state, Vehicle vehicle, ConnectionType direction)
     {
         _connectionLookup.TryGetBuffer(vehicle.CurrentSegment, out var connections);
         var vehicleSegment = SystemAPI.GetComponent<Segment>(vehicle.CurrentSegment);
@@ -111,7 +115,7 @@ public partial struct SegmentSwitchSystem : ISystem
         for (var i = 0; i < connections.Length; i++)
         {
             var connection = connections[i];
-            if (connection.Type != ConnectionType.LeftAdjacent)
+            if (connection.Type != direction)
                 continue;
 
             var distanceToMergingPoint = math.distance(
@@ -128,7 +132,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return default;
     }
 
-    private ConnectionPoint GetRandomConnectionPoint(RefRW<Vehicle> vehicle, int randomSeed)
+    private ConnectionPoint GetRandomIntersectionPoint(RefRW<Vehicle> vehicle, int randomSeed)
     {
         _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentSegment, out var connections);
         if (connections.Length == 0)

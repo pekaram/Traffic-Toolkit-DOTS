@@ -12,14 +12,14 @@ public partial struct SpeedPlanningSystem : ISystem
     {
         foreach (var vehicle in SystemAPI.Query<RefRW<Vehicle>>())
         {
-            if(vehicle.ValueRW.CurrentSegment == Entity.Null)
+            if (vehicle.ValueRW.CurrentSegment == Entity.Null)
                 continue;
 
             var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
             var remainingDistance = math.distance(BezierUtilities.EvaluateCubicBezier(segment, 1), BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T));
             var minimumBrakingDistance = (vehicle.ValueRO.CurrentSpeed * vehicle.ValueRO.CurrentSpeed) / (2f * SpeedControlSystem.BrakingPowerPerSecond) + TrafficLightStopGap;
 
-            vehicle.ValueRW.SpeedToReach = segment.SpeedLimit;
+            vehicle.ValueRW.SpeedToReach = segment.SpeedLimit * vehicle.ValueRO.DriverSpeedBias;
 
             if (remainingDistance > minimumBrakingDistance)
                 continue;

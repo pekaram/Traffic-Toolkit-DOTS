@@ -1,9 +1,12 @@
+using Bezier;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(VehicleSpawner))]
@@ -50,15 +53,10 @@ public class VehicleSpawner : MonoBehaviour
             var t = i * (1f / _vehicleCount);
             vehicleSettings.Segment = _targetSegment;
             vehicleSettings.T = t;
-            vehicleSettings.MaxSpeed = Random.Range(15, 20);
+            vehicleSettings.DriverSpeedBias = Random.Range(0.5f, 1.5f);
             vehicle.name = $"{_vehiclePrefab.name} {_spawnedVehicles.Count}";
 
-            var spawnPos = EvaluateCubicBezier(
-                _targetSegment.Start,
-                _targetSegment.StartTangent,
-                _targetSegment.EndTangent,
-                _targetSegment.End,
-                t);
+            var spawnPos = BezierUtilities.EvaluateCubicBezier(_targetSegment, t);
             var worldSegment = _targetSegment.transform.TransformPoint(_targetSegment.Start);
             var worldSegmentEnd = _targetSegment.transform.TransformPoint(_targetSegment.End);
             vehicleTransform.position = _targetSegment.transform.TransformPoint(spawnPos);
@@ -81,16 +79,6 @@ public class VehicleSpawner : MonoBehaviour
         }
 
         EditorUtility.SetDirty(_parentContainer);
-    }
-
-
-    private Vector3 EvaluateCubicBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-    {
-        float u = 1 - t;
-        return u * u * u * p0 +
-               3 * u * u * t * p1 +
-               3 * u * t * t * p2 +
-               t * t * t * p3;
     }
 }
 #endif

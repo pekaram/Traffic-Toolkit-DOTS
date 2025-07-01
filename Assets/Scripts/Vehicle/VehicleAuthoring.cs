@@ -21,5 +21,12 @@ class VehicleBaker : Baker<VehicleAuthoring>
             T = authoring.T,
             DriverSpeedBias = authoring.DriverSpeedBias,
         });
-    }
+
+        AddComponent(entity, new MergingPlan
+        {
+            SegmentToJoin = Entity.Null
+        });
+
+        AddComponent(entity, new NearestObstacle());
+}
 }

@@ -46,8 +46,8 @@ public partial struct TranslateVehicleSystem : ISystem
             vehicle.T = TranslateT(segment, vehicle.T, vehicle.CurrentSpeed * DeltaTime);
             var newPos = EvaluateCubicBezier(segment, vehicle.T);
             var direction = math.normalize(newPos - transform.Position);
-            var targetRotation = quaternion.LookRotationSafe(direction, math.up());
 
+            var targetRotation = quaternion.LookRotationSafe(direction, math.up());
             transform.Rotation = targetRotation;
             transform.Position = newPos;
         }

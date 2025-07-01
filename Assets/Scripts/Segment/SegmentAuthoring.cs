@@ -1,7 +1,8 @@
-using UnityEngine;
-using Unity.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Entities;
+using UnityEditor.PackageManager;
+using UnityEngine;
 
 public class SegmentAuthoring : MonoBehaviour
 {
@@ -52,7 +53,7 @@ public class SegmentAuthoring : MonoBehaviour
                 End = authoring.WorldEnd,
                 AssociatedTrafficLight = trafficLightEntity,
                 SpeedLimit = authoring.SpeedLimit,
-                IsDeadEnd = !authoring.ConnectedSegments.Any(segment => segment.Type == ConnectionType.Intersection)
+                IsDeadEnd = !authoring.ConnectedSegments.Any(segment => segment.Type == ConnectionType.Intersection || segment.Type == ConnectionType.Join)
             });
 
             var connectionPoints = AddBuffer<ConnectionPoint>(segmentEntity);
@@ -78,6 +79,38 @@ public class SegmentAuthoring : MonoBehaviour
                 var endpointConnection = AddBuffer<ConnectionPoint>(connectionEntity);
                 var connectedSegmentEntity = GetEntity(connection.EndPoint, TransformUsageFlags.None);
                 endpointConnection.Add(new ConnectionPoint { ConnectedSegmentEntity = connectedSegmentEntity, ConnectedSegmentT = connection.toT, TransitionT = 1, Type = ConnectionType.Intersection });         
+            }
+        }
+
+        private void BakeConnectors(Entity segmentEntity, SegmentAuthoring authoring)
+        {
+            var connectors = AddBuffer<ConnectorElementData>(segmentEntity);
+            foreach (var connection in authoring.ConnectedSegments.OrderBy(connection => connection.fromT))
+            {
+                if (connection.EndPoint == null)
+                    continue;
+
+                var connectorSegment = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
+                AddComponent(connectorSegment, new Segment
+                {
+                    Start = connection.WorldSegment.Start,
+                    StartTangent = connection.WorldSegment.StartTangent,
+                    EndTangent = connection.WorldSegment.EndTangent,
+                    End = connection.WorldSegment.End,
+                    SpeedLimit = connection.EndPoint.SpeedLimit,
+                    IsDeadEnd = false
+                });
+                AddComponent(connectorSegment, new Connector
+                {
+                    SegmentA = segmentEntity,
+                    SegmentB = GetEntity(connection.EndPoint, TransformUsageFlags.None),
+                    TransitionT = connection.fromT,
+                    MergeT = connection.toT,
+                    Type = connection.Type
+                });
+
+
+                connectors.Add(new ConnectorElementData { ConnectorSegmentEntity = connectorSegment });
             }
         }
     }

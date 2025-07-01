@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
-public partial struct SpeedControlSystem : ISystem
+public partial struct CollisionDetectionSystem : ISystem
 {
     public const float CriticalGap = 10;
 
@@ -19,31 +19,24 @@ public partial struct SpeedControlSystem : ISystem
         var collisionWorld = physicsWorldSystem.CollisionWorld;
         var deltaTime = SystemAPI.Time.DeltaTime;
 
-        var controlVehicleSpeed = new ControlVehicleSpeed() { CollisionWorld = collisionWorld, DeltaTime = deltaTime };
+        var controlVehicleSpeed = new RaycastJob() { CollisionWorld = collisionWorld, DeltaTime = deltaTime };
         controlVehicleSpeed.ScheduleParallel();
     }
 
     [BurstCompile]
-    public partial struct ControlVehicleSpeed : IJobEntity
+    public partial struct RaycastJob : IJobEntity
     {
         [ReadOnly] public CollisionWorld CollisionWorld;
 
         [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        public void Execute(ref Vehicle vehicle, ref NearestObstacle radarComponent, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
-            var isPathBlocked = IsPathBlocked(ref vehicle, transform, physicsCollider);
-            if (vehicle.CurrentSpeed > vehicle.SpeedToReach || isPathBlocked)
-            {
-                Brake(ref vehicle, DeltaTime * BrakingPowerPerSecond);
-            }
-            else
-            {
-                Accelerate(ref vehicle, AcceleratingPower * DeltaTime);
-            }
+            var isPathBlocked = IsPathBlocked(ref vehicle, ref radarComponent, in transform, in physicsCollider);
+
         }
 
-        private bool IsPathBlocked(ref Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        private bool IsPathBlocked(ref Vehicle vehicle, ref NearestObstacle nearestObstacle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
             var colliderBlob = physicsCollider.Value;
             var aabb = colliderBlob.Value.CalculateAabb();
@@ -56,19 +49,45 @@ public partial struct SpeedControlSystem : ISystem
             var end = transform.Position + transform.Forward() * detectionDistance;
 
             var colliderCast = new ColliderCastInput(colliderBlob, start, end);
-            return CollisionWorld.CastCollider(colliderCast, out _);
+            var isBlocked = CollisionWorld.CastCollider(colliderCast, out var hit);
+            var distanceToHitVehicle = math.distance(hit.Position, transform.Position);
+
+            if (!isBlocked)
+            {
+                ResetDetectedObstacle(ref nearestObstacle);
+                return false;
+            }
+
+            if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distanceToHitVehicle)
+            {
+                return true;
+            }
+
+            nearestObstacle.Distance = distanceToHitVehicle;
+            nearestObstacle.Type = ObstacleType.SlowVehicle;
+
+            return isBlocked;
         }
 
-        private void Brake(ref Vehicle vehicle, float brakePower)
-        {    
-            vehicle.CurrentSpeed = math.max(0f, vehicle.CurrentSpeed - brakePower);
-        }
-
-        private void Accelerate(ref Vehicle vehicle, float acceleratePower)
+        public void TrySetNearestObstacle(ref NearestObstacle nearestObstacle, float distance, ObstacleType obstacleType)
         {
-            vehicle.CurrentSpeed = math.min(vehicle.SpeedToReach, vehicle.CurrentSpeed + acceleratePower);
+            if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distance)
+                return;
+
+            nearestObstacle.Type = obstacleType;
+            nearestObstacle.Distance = distance;
+        }
+
+        private void ResetDetectedObstacle(ref NearestObstacle nearestObstacle)
+        {
+            var ownType = nearestObstacle.Type == ObstacleType.SlowVehicle;
+            if (ownType)
+            {
+                nearestObstacle.Type = ObstacleType.None;
+            }
         }
     }
+
 
     private static void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
     {

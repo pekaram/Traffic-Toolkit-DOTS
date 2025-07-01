@@ -30,5 +30,21 @@ public enum ConnectionType
 {
     Intersection = 0,
     LeftAdjacent = 1,
-    RightAdjacent = 2
+    RightAdjacent = 2,
+    Join = 3,
+}
+
+public struct ConnectorElementData : IBufferElementData
+{
+    public Entity ConnectorSegmentEntity;
+}
+
+public struct Connector : IComponentData
+{
+    public Entity SegmentA;
+    public Entity SegmentB;
+    public float TransitionT;
+    public float MergeT;
+
+    public ConnectionType Type; 
 }

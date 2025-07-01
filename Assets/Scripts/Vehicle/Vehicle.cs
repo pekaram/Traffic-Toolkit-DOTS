@@ -9,3 +9,8 @@ public struct Vehicle : IComponentData
     public Entity CurrentSegment;
     public float T;
 }
+
+public struct MergingPlan : IComponentData, IEnableableComponent
+{
+    public Entity SegmentToJoin;
+}

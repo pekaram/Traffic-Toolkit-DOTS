@@ -16,16 +16,6 @@ public struct Segment : IComponentData
     public bool IsDeadEnd;
 }
 
-public struct ConnectionPoint : IBufferElementData
-{
-    public float TransitionT;
-
-    public Entity ConnectedSegmentEntity;
-    public float ConnectedSegmentT;
-
-    public ConnectionType Type; // 0 = Intersection, 1 = LeftAdjacent, 2 = RightAdacent
-}
-
 public enum ConnectionType
 {
     Intersection = 0,

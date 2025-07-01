@@ -56,30 +56,7 @@ public class SegmentAuthoring : MonoBehaviour
                 IsDeadEnd = !authoring.ConnectedSegments.Any(segment => segment.Type == ConnectionType.Intersection || segment.Type == ConnectionType.Join)
             });
 
-            var connectionPoints = AddBuffer<ConnectionPoint>(segmentEntity);
-            foreach (var connection in authoring.ConnectedSegments.OrderBy(connection => connection.fromT))
-            {
-                if (connection.EndPoint == null)
-                    continue;
-
-                var connectionEntity = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
-                AddComponent(connectionEntity, new Segment
-                {
-                    Start = connection.WorldSegment.Start,
-                    StartTangent = connection.WorldSegment.StartTangent,
-                    EndTangent = connection.WorldSegment.EndTangent,
-                    End = connection.WorldSegment.End,
-                    SpeedLimit = connection.EndPoint.SpeedLimit,
-                    IsDeadEnd = false
-                });
-
-                var startPoint = new ConnectionPoint { ConnectedSegmentEntity = connectionEntity, TransitionT = connection.fromT, ConnectedSegmentT = 0, Type = connection.Type };
-                connectionPoints.Add(startPoint);
-
-                var endpointConnection = AddBuffer<ConnectionPoint>(connectionEntity);
-                var connectedSegmentEntity = GetEntity(connection.EndPoint, TransformUsageFlags.None);
-                endpointConnection.Add(new ConnectionPoint { ConnectedSegmentEntity = connectedSegmentEntity, ConnectedSegmentT = connection.toT, TransitionT = 1, Type = ConnectionType.Intersection });         
-            }
+            BakeConnectors(segmentEntity, authoring);
         }
 
         private void BakeConnectors(Entity segmentEntity, SegmentAuthoring authoring)

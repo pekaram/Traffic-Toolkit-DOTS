@@ -1,5 +1,4 @@
 using Bezier;
-using System.Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -10,11 +9,11 @@ public partial struct SegmentSwitchSystem : ISystem
 
     private const float SegmentSwitchDistance = 0.05f;
 
-    private BufferLookup<ConnectionPoint> _connectionLookup;
+    private BufferLookup<ConnectorElementData> _connectionLookup;
 
     public void OnCreate(ref SystemState state)
     {
-        _connectionLookup = state.GetBufferLookup<ConnectionPoint>(true);
+        _connectionLookup = state.GetBufferLookup<ConnectorElementData>(true);
     }
 
     [BurstCompile]
@@ -32,13 +31,16 @@ public partial struct SegmentSwitchSystem : ISystem
             {
                 if (TryEnterNext(ref state, vehicle, entity.Index * 100000))
                 {
-                    UnityEngine.Debug.LogError($"Vehicle {entity.Index} entered next segment: {vehicle.ValueRO.CurrentSegment}");
-                    SystemAPI.SetComponentEnabled<MergingPlan>(entity, false);
+                   SystemAPI.SetComponentEnabled<MergingPlan>(entity, false);
                 }
 
                 continue;
             }
         
+            var isInConnector = SystemAPI.HasComponent<Connector>(vehicle.ValueRO.CurrentSegment);
+            if (isInConnector)
+                continue;
+
             var isMerging = TryChangeToAdjacent(ref state, vehicle, ConnectionType.LeftAdjacent);
 
             //if (vehicle.ValueRO.DriverSpeedBias > 1)
@@ -61,8 +63,8 @@ public partial struct SegmentSwitchSystem : ISystem
 
     private void UpdateMergePlan(ref SystemState state, Entity meringVehicleEntity, Vehicle vehicle)
     {
-        _connectionLookup.TryGetBuffer(vehicle.CurrentSegment, out var connectionEndpoints);
-        var segmentToEnter = connectionEndpoints[0].ConnectedSegmentEntity;
+        var connector = SystemAPI.GetComponent<Connector>(vehicle.CurrentSegment);
+        var segmentToEnter = connector.SegmentB;
         SystemAPI.SetComponent(meringVehicleEntity, new MergingPlan() { SegmentToJoin = segmentToEnter });
         SystemAPI.SetComponentEnabled<MergingPlan>(meringVehicleEntity, true);
     }
@@ -72,52 +74,49 @@ public partial struct SegmentSwitchSystem : ISystem
         if (vehicle.ValueRO.CurrentSegment == Entity.Null)
             return false;
 
-        var connectionPoint = GetRandomIntersectionPoint(vehicle, randomSeed);
-        if (connectionPoint.ConnectedSegmentEntity == Entity.Null)
+        var isConnector = SystemAPI.HasComponent<Connector>(vehicle.ValueRO.CurrentSegment);
+        if (isConnector)
+        {
+            var connector = SystemAPI.GetComponent<Connector>(vehicle.ValueRO.CurrentSegment);
+            vehicle.ValueRW.CurrentSegment = connector.SegmentB;
+            vehicle.ValueRW.T = connector.MergeT;
+            return true;
+        }
+
+        var connectorEntity = GetAnyIntersectionConnectionToJoin(ref state, vehicle, randomSeed);
+        if (connectorEntity == Entity.Null)
             return false;
 
-        var hasGap = HasEnoughGap(ref state, vehicle.ValueRO, connectionPoint);
-        if (!hasGap)
-            return false;
-
-        vehicle.ValueRW.CurrentSegment = connectionPoint.ConnectedSegmentEntity;
-        vehicle.ValueRW.T = connectionPoint.ConnectedSegmentT;
+        vehicle.ValueRW.CurrentSegment = connectorEntity;
+        vehicle.ValueRW.T = 0;
         return true;
     }
 
     private bool TryChangeToAdjacent(ref SystemState state, RefRW<Vehicle> mergingVehicle, ConnectionType direction)
     {
-        var connection = GetNearestAdjacentPoint(ref state, mergingVehicle.ValueRO, direction);
-        if (connection.ConnectedSegmentEntity == Entity.Null)
+        var connectionEntity = GetNearestAdjacentConnector(ref state, mergingVehicle.ValueRO, direction);
+        if (connectionEntity == Entity.Null)
             return false;
 
-        var hasGap = HasEnoughGap(ref state, mergingVehicle.ValueRO, connection);
+        var hasGap = WillHaveGap(ref state, mergingVehicle.ValueRO, connectionEntity);
         if (!hasGap)
             return false;
 
-        mergingVehicle.ValueRW.CurrentSegment = connection.ConnectedSegmentEntity;
-        mergingVehicle.ValueRW.T = connection.ConnectedSegmentT;
+        mergingVehicle.ValueRW.CurrentSegment = connectionEntity;
+        mergingVehicle.ValueRW.T = 0;
         return true;
     }
 
-    private bool HasEnoughGap(ref SystemState state, in Vehicle mergingVehicle, in ConnectionPoint connectionStart)
+    private bool WillHaveGap(ref SystemState state, in Vehicle mergingVehicle, in Entity connectorSegmentEntity)
     {
-        var connectorSegment = SystemAPI.GetComponent<Segment>(connectionStart.ConnectedSegmentEntity);
-        _connectionLookup.TryGetBuffer(connectionStart.ConnectedSegmentEntity, out var connectionEndpoints);
-        if(connectionEndpoints.Length == 0)
-            return true;
-        
-        var connectionEnd = connectionEndpoints[0];
-        if (connectionEnd.ConnectedSegmentT == 0)
-            return true;
- 
-        var newSegment = SystemAPI.GetComponent<Segment>(connectionEnd.ConnectedSegmentEntity);
+        var connectorSegment = SystemAPI.GetComponent<Segment>(connectorSegmentEntity);
+        var connector = SystemAPI.GetComponent<Connector>(connectorSegmentEntity);
+        var newSegment = SystemAPI.GetComponent<Segment>(connector.SegmentB);
 
         foreach (var otherVehicle in SystemAPI.Query<RefRO<Vehicle>>())
         {
-            if (!connectionEnd.ConnectedSegmentEntity.Equals(otherVehicle.ValueRO.CurrentSegment))
+            if (!connector.SegmentB.Equals(otherVehicle.ValueRO.CurrentSegment))
                 continue;
-
 
             // Change to segment.speed?
             var mergingSpeed = mergingVehicle.SpeedToReach;
@@ -131,6 +130,11 @@ public partial struct SegmentSwitchSystem : ISystem
             var predictedOtherVehiclePosition = BezierUtilities.EvaluateCubicBezier(newSegment, predictedOtherVehicleT);
             if (math.distance(destination, predictedOtherVehiclePosition) < RequiredGapDistance)
             {
+                if (connector.Type == ConnectionType.Join)
+                {
+                    UnityEngine.Debug.LogError("Join connections are false" + " " + mergingVehicle.T + " SPEED:" + mergingVehicle.SpeedToReach);
+
+                }
                 return false;
             }
         }
@@ -138,7 +142,7 @@ public partial struct SegmentSwitchSystem : ISystem
         return true;
     }
 
-    private ConnectionPoint GetNearestAdjacentPoint(ref SystemState state, Vehicle vehicle, ConnectionType direction)
+    private Entity GetNearestAdjacentConnector(ref SystemState state, Vehicle vehicle, ConnectionType direction)
     {
         _connectionLookup.TryGetBuffer(vehicle.CurrentSegment, out var connections);
         var vehicleSegment = SystemAPI.GetComponent<Segment>(vehicle.CurrentSegment);
@@ -148,7 +152,8 @@ public partial struct SegmentSwitchSystem : ISystem
 
         for (var i = 0; i < connections.Length; i++)
         {
-            var connection = connections[i];
+            var connectionEntity = connections[i];
+            var connection = SystemAPI.GetComponent<Connector>(connectionEntity.ConnectorSegmentEntity); 
             if (connection.Type != direction)
                 continue;
 
@@ -160,28 +165,34 @@ public partial struct SegmentSwitchSystem : ISystem
                 continue;
 
             // Assumes buffer is sorted by T, rest of the connections are >= T
-            return connection;
+            return connectionEntity.ConnectorSegmentEntity;
         }
 
         return default;
     }
 
-    private ConnectionPoint GetRandomIntersectionPoint(RefRW<Vehicle> vehicle, int randomSeed)
+    private Entity GetAnyIntersectionConnectionToJoin(ref SystemState state, RefRW<Vehicle> vehicle, int randomSeed)
     {
         _connectionLookup.TryGetBuffer(vehicle.ValueRO.CurrentSegment, out var connections);
         if (connections.Length == 0)
-            return default;
-
+        {
+            return Entity.Null;
+        }    
+        // Oh must be a segment with many connections, 
         for (var i = 0; i < connections.Length; i++)
         {
-            var connection = connections[i];
-            if (connection.TransitionT < 1)
+            var connectorEntity = connections[i].ConnectorSegmentEntity;
+            var connector = SystemAPI.GetComponent<Connector>(connectorEntity);
+            if (connector.Type != ConnectionType.Intersection)
+                continue;
+
+            if (connector.TransitionT < 1)
                 continue;
 
             // Assumes buffer is sorted by T, rest of the connections are >= T
             var random = new Random((uint)randomSeed);
             var randomIndex = random.NextInt(i, connections.Length);
-            return connections[randomIndex];
+            return connectorEntity;
         }
 
         return default;

@@ -12,7 +12,7 @@ public partial struct MergingVehicleDetectionSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (vehicle, nearestObstacle) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestObstacle>>())
+        foreach (var (vehicle, nearestObstacle) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestDectectedObstacle>>())
         {
             if (vehicle.ValueRW.CurrentSegment == Entity.Null)
                 continue;
@@ -25,24 +25,26 @@ public partial struct MergingVehicleDetectionSystem : ISystem
 
             var isMergingVehicleAhead = false;
             var mergingVehiclePosition = float3.zero;
-       
-            foreach (var (mergingVehicle, mergingPlan, mergingTransform) in SystemAPI.Query<RefRO<Vehicle>, RefRO<MergingPlan>, RefRO<LocalTransform>>())
+
+            foreach (var (mergingVehicle, mergingTransform) 
+                in SystemAPI.Query<RefRW<Vehicle>, RefRO<LocalTransform>>().WithAll<MergeTag>())
             {
-                if (mergingPlan.ValueRO.SegmentToJoin.Equals(vehicle.ValueRO.CurrentSegment))
+                var segmentToJoin = SystemAPI.GetComponent<Connector>(mergingVehicle.ValueRO.CurrentSegment).SegmentB;
+                if (!segmentToJoin.Equals(vehicle.ValueRO.CurrentSegment))
+                    continue;
+
+                var remainingDistanceToMerging = math.distance(mergingTransform.ValueRO.Position, vehiclePosition);
+
+                var distanceDirection = mergingTransform.ValueRO.Position - vehiclePosition;
+                var headingDirection = BezierUtilities.EvaluateCubicBezier(segment, 1) - vehiclePosition;
+                var distanceDot = math.dot(math.normalize(distanceDirection), math.normalize(headingDirection));
+
+                if (remainingDistanceToMerging < minimumBrakingDistance && distanceDot > 0)
                 {
-                    var remainingDistanceToMerging = math.distance(mergingTransform.ValueRO.Position, vehiclePosition);
+                    isMergingVehicleAhead = true;
+                    mergingVehiclePosition = mergingTransform.ValueRO.Position;
 
-                    var distanceDirection = mergingTransform.ValueRO.Position - vehiclePosition;
-                    var headingDirection = BezierUtilities.EvaluateCubicBezier(segment, 1) - vehiclePosition;
-                    float distanceDot = math.dot(math.normalize(distanceDirection), math.normalize(headingDirection));
-
-                    if (remainingDistanceToMerging < minimumBrakingDistance && distanceDot > .5f)
-                    {
-                        isMergingVehicleAhead = true;
-                        mergingVehiclePosition = mergingTransform.ValueRO.Position;
-
-                        break;
-                    }
+                    break;
                 }
             }
 
@@ -53,11 +55,11 @@ public partial struct MergingVehicleDetectionSystem : ISystem
             }
 
             var distanceToMergingVehicle = math.distance(mergingVehiclePosition, vehiclePosition);
-            TrySetNearestObstacle(ref nearestObstacle.ValueRW, distanceToMergingVehicle, ObstacleType.MergingVehicle);
+            TrySetNearestObstacle(ref nearestObstacle.ValueRW, distanceToMergingVehicle, ObstacleType.MergeAhead);
         }
     }
 
-    public void TrySetNearestObstacle(ref NearestObstacle nearestObstacle, float distance, ObstacleType obstacleType)
+    public void TrySetNearestObstacle(ref NearestDectectedObstacle nearestObstacle, float distance, ObstacleType obstacleType)
     {
         if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distance)
             return;
@@ -66,9 +68,9 @@ public partial struct MergingVehicleDetectionSystem : ISystem
         nearestObstacle.Distance = distance;
     }
 
-    private void ResetDetectedObstacle(ref NearestObstacle nearestObstacle)
+    private void ResetDetectedObstacle(ref NearestDectectedObstacle nearestObstacle)
     {
-        var ownDetection = nearestObstacle.Type == ObstacleType.MergingVehicle;
+        var ownDetection = nearestObstacle.Type == ObstacleType.MergeAhead;
         if (ownDetection)
         {
             nearestObstacle.Type = ObstacleType.None;

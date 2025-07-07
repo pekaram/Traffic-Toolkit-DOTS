@@ -1,7 +1,7 @@
 using Unity.Entities;
 
 [System.Serializable]
-public struct NearestObstacle : IComponentData
+public struct NearestDectectedObstacle : IComponentData
 {
     public ObstacleType Type;
     public float Distance;
@@ -11,7 +11,7 @@ public enum ObstacleType
 {
     None,
     SlowVehicle,
-    MergingVehicle,
+    MergeAhead,
     RedLight,
     DeadEnd,
 }

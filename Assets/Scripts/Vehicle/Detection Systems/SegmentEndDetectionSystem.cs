@@ -5,13 +5,13 @@ using Unity.Mathematics;
 
 public partial struct SegmentEndDetectionSystem : ISystem
 {
-    private const float TrafficLightStopGap = 1f;
+    private const float TrafficLightStopGap = 0;
 
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (vehicle, nearestObstacle) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestObstacle>>())
+        foreach (var (vehicle, nearestObstacle) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestDectectedObstacle>>())
         {
             if (vehicle.ValueRW.CurrentSegment == Entity.Null)
                 continue;
@@ -55,7 +55,7 @@ public partial struct SegmentEndDetectionSystem : ISystem
         }
     }
 
-    public void TrySetNearestObstacle(ref NearestObstacle nearestObstacle, float distance, ObstacleType obstacleType)
+    public void TrySetNearestObstacle(ref NearestDectectedObstacle nearestObstacle, float distance, ObstacleType obstacleType)
     {
         if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distance)
             return;
@@ -64,7 +64,7 @@ public partial struct SegmentEndDetectionSystem : ISystem
         nearestObstacle.Distance = distance;
     }
 
-    private void ResetDetectedObstacle(ref NearestObstacle nearestObstacle)
+    private void ResetDetectedObstacle(ref NearestDectectedObstacle nearestObstacle)
     {
         var ownType = nearestObstacle.Type == ObstacleType.DeadEnd || nearestObstacle.Type == ObstacleType.RedLight;
         if (ownType)

@@ -21,12 +21,12 @@ public enum ConnectionType
     Intersection = 0,
     LeftAdjacent = 1,
     RightAdjacent = 2,
-    Join = 3,
+    ZipperMerge = 3,
 }
 
-public struct ConnectorElementData : IBufferElementData
+public struct ConnectorSegmentEntity : IBufferElementData
 {
-    public Entity ConnectorSegmentEntity;
+    public Entity Entity;
 }
 
 public struct Connector : IComponentData

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Entities;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class SegmentAuthoring : MonoBehaviour
@@ -53,7 +52,7 @@ public class SegmentAuthoring : MonoBehaviour
                 End = authoring.WorldEnd,
                 AssociatedTrafficLight = trafficLightEntity,
                 SpeedLimit = authoring.SpeedLimit,
-                IsDeadEnd = !authoring.ConnectedSegments.Any(segment => segment.Type == ConnectionType.Intersection || segment.Type == ConnectionType.Join)
+                IsDeadEnd = authoring.ConnectedSegments.All(segment => segment.fromT < 1)
             });
 
             BakeConnectors(segmentEntity, authoring);
@@ -61,7 +60,7 @@ public class SegmentAuthoring : MonoBehaviour
 
         private void BakeConnectors(Entity segmentEntity, SegmentAuthoring authoring)
         {
-            var connectors = AddBuffer<ConnectorElementData>(segmentEntity);
+            var connectors = AddBuffer<ConnectorSegmentEntity>(segmentEntity);
             foreach (var connection in authoring.ConnectedSegments.OrderBy(connection => connection.fromT))
             {
                 if (connection.EndPoint == null)
@@ -87,7 +86,7 @@ public class SegmentAuthoring : MonoBehaviour
                 });
 
 
-                connectors.Add(new ConnectorElementData { ConnectorSegmentEntity = connectorSegment });
+                connectors.Add(new ConnectorSegmentEntity { Entity = connectorSegment });
             }
         }
     }

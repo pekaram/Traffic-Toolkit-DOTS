@@ -8,6 +8,11 @@ namespace Bezier
         public static float TranslateT(Segment segment, float t, float targetDistance)
         {
             const int steps = 1000;
+            return TranslateT(segment, t, targetDistance, steps);
+        }
+
+        public static float TranslateT(Segment segment, float t, float targetDistance, int steps)
+        {
             var newPosition = EvaluateCubicBezier(segment, t);
             var oldPosition = newPosition;
             for (var step = t * steps; step <= steps + 1; step += 1)

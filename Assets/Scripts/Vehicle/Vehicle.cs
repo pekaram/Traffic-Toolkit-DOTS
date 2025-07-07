@@ -10,7 +10,6 @@ public struct Vehicle : IComponentData
     public float T;
 }
 
-public struct MergingPlan : IComponentData, IEnableableComponent
+public struct MergeTag : IComponentData, IEnableableComponent
 {
-    public Entity SegmentToJoin;
 }

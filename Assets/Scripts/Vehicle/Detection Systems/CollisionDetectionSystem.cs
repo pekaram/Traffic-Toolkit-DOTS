@@ -30,13 +30,13 @@ public partial struct CollisionDetectionSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, ref NearestObstacle radarComponent, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        public void Execute(ref Vehicle vehicle, ref NearestDectectedObstacle radarComponent, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
             var isPathBlocked = IsPathBlocked(ref vehicle, ref radarComponent, in transform, in physicsCollider);
 
         }
 
-        private bool IsPathBlocked(ref Vehicle vehicle, ref NearestObstacle nearestObstacle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        private bool IsPathBlocked(ref Vehicle vehicle, ref NearestDectectedObstacle nearestObstacle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
             var colliderBlob = physicsCollider.Value;
             var aabb = colliderBlob.Value.CalculateAabb();
@@ -69,7 +69,7 @@ public partial struct CollisionDetectionSystem : ISystem
             return isBlocked;
         }
 
-        public void TrySetNearestObstacle(ref NearestObstacle nearestObstacle, float distance, ObstacleType obstacleType)
+        public void TrySetNearestObstacle(ref NearestDectectedObstacle nearestObstacle, float distance, ObstacleType obstacleType)
         {
             if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distance)
                 return;
@@ -78,7 +78,7 @@ public partial struct CollisionDetectionSystem : ISystem
             nearestObstacle.Distance = distance;
         }
 
-        private void ResetDetectedObstacle(ref NearestObstacle nearestObstacle)
+        private void ResetDetectedObstacle(ref NearestDectectedObstacle nearestObstacle)
         {
             var ownType = nearestObstacle.Type == ObstacleType.SlowVehicle;
             if (ownType)

@@ -9,9 +9,6 @@ public partial struct CollisionDetectionSystem : ISystem
 {
     public const float CriticalGap = 10;
 
-    private const float AcceleratingPower = 10;
-    public const float BrakingPowerPerSecond = 10; 
-
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -30,13 +27,25 @@ public partial struct CollisionDetectionSystem : ISystem
 
         [ReadOnly] public float DeltaTime;
 
-        public void Execute(ref Vehicle vehicle, ref NearestDectectedObstacle radarComponent, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        public void Execute(ref NearestDectectedObstacle detectedObstacle, in Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider)
         {
-            var isPathBlocked = IsPathBlocked(ref vehicle, ref radarComponent, in transform, in physicsCollider);
+            var isPathBlocked = ColliderCastForward(in vehicle, in transform, in physicsCollider, out var hit);
+            if (!isPathBlocked)
+            {
+                ResetDetectedObstacle(ref detectedObstacle);
+                return;
+            }
 
+            var distanceToHitVehicle = math.distance(hit.Position, transform.Position);
+            if (detectedObstacle.Type != ObstacleType.None && detectedObstacle.Distance < distanceToHitVehicle)
+                return;
+
+            detectedObstacle.Distance = distanceToHitVehicle;
+            detectedObstacle.Type = ObstacleType.SlowVehicle;
         }
 
-        private bool IsPathBlocked(ref Vehicle vehicle, ref NearestDectectedObstacle nearestObstacle, in LocalTransform transform, in PhysicsCollider physicsCollider)
+        private bool ColliderCastForward(
+            in Vehicle vehicle, in LocalTransform transform, in PhysicsCollider physicsCollider, out ColliderCastHit hit)
         {
             var colliderBlob = physicsCollider.Value;
             var aabb = colliderBlob.Value.CalculateAabb();
@@ -44,29 +53,13 @@ public partial struct CollisionDetectionSystem : ISystem
             var startOffset = distanceToColliderTip + 0.1f;
             var start = transform.Position + transform.Forward() * startOffset;
 
-            var brakingDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * BrakingPowerPerSecond);
+            var brakingDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * SpeedSystem.BrakingPowerPerSecond);
             var detectionDistance = brakingDistance + CriticalGap;
             var end = transform.Position + transform.Forward() * detectionDistance;
 
             var colliderCast = new ColliderCastInput(colliderBlob, start, end);
-            var isBlocked = CollisionWorld.CastCollider(colliderCast, out var hit);
-            var distanceToHitVehicle = math.distance(hit.Position, transform.Position);
-
-            if (!isBlocked)
-            {
-                ResetDetectedObstacle(ref nearestObstacle);
-                return false;
-            }
-
-            if (nearestObstacle.Type != ObstacleType.None && nearestObstacle.Distance < distanceToHitVehicle)
-            {
-                return true;
-            }
-
-            nearestObstacle.Distance = distanceToHitVehicle;
-            nearestObstacle.Type = ObstacleType.SlowVehicle;
-
-            return isBlocked;
+            var isHit = CollisionWorld.CastCollider(colliderCast, out hit);   
+            return isHit;
         }
 
         public void TrySetNearestObstacle(ref NearestDectectedObstacle nearestObstacle, float distance, ObstacleType obstacleType)
@@ -87,7 +80,6 @@ public partial struct CollisionDetectionSystem : ISystem
             }
         }
     }
-
 
     private static void LogCollisionError(Entity entity1, Entity entity2, EntityManager entityManager)
     {

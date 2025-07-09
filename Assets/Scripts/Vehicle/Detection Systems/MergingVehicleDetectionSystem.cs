@@ -3,29 +3,25 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-
+ 
 public partial struct MergingVehicleDetectionSystem : ISystem
 {
-    private const float TrafficLightStopGap = 20;
-
+    private const float CriticalGap = CollisionDetectionSystem.CriticalGap;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (vehicle, nearestObstacle) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestDectectedObstacle>>())
+        foreach (var (vehicle, nearestObstacle, transform) in SystemAPI.Query<RefRW<Vehicle>, RefRW<NearestDectectedObstacle>, RefRO<LocalTransform>>())
         {
+            ResetDetectedObstacle(ref nearestObstacle.ValueRW);
+
             if (vehicle.ValueRW.CurrentSegment == Entity.Null)
                 continue;
 
-            var brakingDistance = (vehicle.ValueRO.CurrentSpeed * vehicle.ValueRO.CurrentSpeed) / (2f * CollisionDetectionSystem.BrakingPowerPerSecond);  
-            var minimumBrakingDistance = brakingDistance + TrafficLightStopGap;
-            minimumBrakingDistance = math.max(minimumBrakingDistance, TrafficLightStopGap);
             var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
-            var vehiclePosition = BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T);
+            var vehiclePosition = transform.ValueRO.Position;
 
-            var isMergingVehicleAhead = false;
-            var mergingVehiclePosition = float3.zero;
-
+            var distanceToMergingVehicle = 0f;
             foreach (var (mergingVehicle, mergingTransform) 
                 in SystemAPI.Query<RefRW<Vehicle>, RefRO<LocalTransform>>().WithAll<MergeTag>())
             {
@@ -33,30 +29,28 @@ public partial struct MergingVehicleDetectionSystem : ISystem
                 if (!segmentToJoin.Equals(vehicle.ValueRO.CurrentSegment))
                     continue;
 
-                var remainingDistanceToMerging = math.distance(mergingTransform.ValueRO.Position, vehiclePosition);
-
-                var distanceDirection = mergingTransform.ValueRO.Position - vehiclePosition;
-                var headingDirection = BezierUtilities.EvaluateCubicBezier(segment, 1) - vehiclePosition;
-                var distanceDot = math.dot(math.normalize(distanceDirection), math.normalize(headingDirection));
-
-                if (remainingDistanceToMerging < minimumBrakingDistance && distanceDot > 0)
+                var isPathBlocked = IsPathBlockedByMerge(in vehicle.ValueRO, in vehiclePosition, in mergingTransform.ValueRO.Position, in segment);
+                var distanceToPreviousMergingVehicle = distanceToMergingVehicle;
+                distanceToMergingVehicle = math.distance(mergingTransform.ValueRO.Position, vehiclePosition);
+                if (isPathBlocked && distanceToMergingVehicle < distanceToPreviousMergingVehicle)
                 {
-                    isMergingVehicleAhead = true;
-                    mergingVehiclePosition = mergingTransform.ValueRO.Position;
-
-                    break;
+                    distanceToMergingVehicle = math.distance(mergingTransform.ValueRO.Position, vehiclePosition);
+                    TrySetNearestObstacle(ref nearestObstacle.ValueRW, distanceToMergingVehicle, ObstacleType.MergeAhead);
                 }
             }
-
-            if (!isMergingVehicleAhead)
-            {
-                ResetDetectedObstacle(ref nearestObstacle.ValueRW);
-                continue;
-            }
-
-            var distanceToMergingVehicle = math.distance(mergingVehiclePosition, vehiclePosition);
-            TrySetNearestObstacle(ref nearestObstacle.ValueRW, distanceToMergingVehicle, ObstacleType.MergeAhead);
         }
+    }
+
+    public bool IsPathBlockedByMerge(in Vehicle vehicle, in float3 vehiclePosition, in float3 mergePosition, in Segment segment)
+    {
+        var brakeStopDistance = (vehicle.CurrentSpeed * vehicle.CurrentSpeed) / (2f * SpeedSystem.BrakingPowerPerSecond);
+        var criticalStopDistance = brakeStopDistance + CriticalGap;
+        var distanceToMergeAhead = math.distance(mergePosition, vehiclePosition);
+        var distanceDirection = mergePosition - vehiclePosition;
+        var vehicleHeadingDirection = BezierUtilities.EvaluateCubicBezier(segment, 1) - vehiclePosition;
+        var distanceDot = math.dot(math.normalize(distanceDirection), math.normalize(vehicleHeadingDirection));
+
+        return distanceToMergeAhead < criticalStopDistance && distanceDot > 0;
     }
 
     public void TrySetNearestObstacle(ref NearestDectectedObstacle nearestObstacle, float distance, ObstacleType obstacleType)

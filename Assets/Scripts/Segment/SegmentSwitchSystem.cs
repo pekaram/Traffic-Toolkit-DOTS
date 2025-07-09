@@ -110,9 +110,7 @@ public partial struct SegmentSwitchSystem : ISystem
             if (!connector.SegmentB.Equals(otherVehicle.ValueRO.CurrentSegment))
                 continue;
 
-            // Change to segment.speed?
-            var mergingSpeed = mergingVehicle.SpeedToReach;
-
+            var mergingSpeed = connectorSegment.SpeedLimit;
             var start = BezierUtilities.EvaluateCubicBezier(connectorSegment, 0);
             var destination = BezierUtilities.EvaluateCubicBezier(connectorSegment, 1);
             var travelDistance = math.distance(destination, start);
@@ -172,7 +170,7 @@ public partial struct SegmentSwitchSystem : ISystem
             // Assumes buffer is sorted by T, rest of the connections are >= T
             var random = new Random((uint)randomSeed);
             var randomIndex = random.NextInt(i, connections.Length);
-            return connectorEntity;
+            return connections[randomIndex].Entity;
         }
 
         return default;

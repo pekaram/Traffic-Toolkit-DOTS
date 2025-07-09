@@ -16,7 +16,6 @@ class VehicleBaker : Baker<VehicleAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent(entity, new Vehicle
         {
-            SpeedToReach = authoring.Segment.SpeedLimit * authoring.DriverSpeedBias,
             CurrentSegment = GetEntity(authoring.Segment, TransformUsageFlags.None),
             T = authoring.T,
             DriverSpeedBias = authoring.DriverSpeedBias,

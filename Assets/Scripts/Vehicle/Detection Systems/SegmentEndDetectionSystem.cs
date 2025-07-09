@@ -5,8 +5,7 @@ using Unity.Mathematics;
 
 public partial struct SegmentEndDetectionSystem : ISystem
 {
-    private const float TrafficLightStopGap = 0;
-
+    private const float CriticalGap = 10;
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -16,41 +15,30 @@ public partial struct SegmentEndDetectionSystem : ISystem
             if (vehicle.ValueRW.CurrentSegment == Entity.Null)
                 continue;
 
-            var brakingDistance = (vehicle.ValueRO.CurrentSpeed * vehicle.ValueRO.CurrentSpeed) / (2f * CollisionDetectionSystem.BrakingPowerPerSecond);
-            var minimumBrakingDistance = brakingDistance + TrafficLightStopGap;
-            minimumBrakingDistance = math.max(minimumBrakingDistance, TrafficLightStopGap);
+            var brakeStopDistance = (vehicle.ValueRO.CurrentSpeed * vehicle.ValueRO.CurrentSpeed) / (2f * SpeedSystem.BrakingPowerPerSecond);
+            var criticalStopDistance = brakeStopDistance + CriticalGap;
 
             var segment = SystemAPI.GetComponent<Segment>(vehicle.ValueRO.CurrentSegment);
-            var vehiclePosition = BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T);
-
-            var remainingDistance = math.distance(BezierUtilities.EvaluateCubicBezier(segment, 1), BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T));
-
-            vehicle.ValueRW.SpeedToReach = segment.SpeedLimit * vehicle.ValueRO.DriverSpeedBias;
-
-            var segmentDirection = BezierUtilities.EvaluateCubicBezier(segment, 1) - BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T);
+            var remainingDistanceToSegmentEnd = math.distance(BezierUtilities.EvaluateCubicBezier(segment, 1), BezierUtilities.EvaluateCubicBezier(segment, vehicle.ValueRO.T));
 
             ResetDetectedObstacle(ref nearestObstacle.ValueRW);
 
-            if (remainingDistance > minimumBrakingDistance)
-            {
+            if (remainingDistanceToSegmentEnd > criticalStopDistance)
                 continue;
-            }
 
             if (segment.IsDeadEnd)
             {
-                TrySetNearestObstacle(ref nearestObstacle.ValueRW, remainingDistance, ObstacleType.DeadEnd);
+                TrySetNearestObstacle(ref nearestObstacle.ValueRW, remainingDistanceToSegmentEnd, ObstacleType.DeadEnd);
                 continue;
             }
 
             if (segment.AssociatedTrafficLight == Entity.Null)
-            {
                 continue;
-            }
 
             var trafficLight = SystemAPI.GetComponent<TrafficLight>(segment.AssociatedTrafficLight);
             if (trafficLight.Signal != TrafficLightSignal.Green)
             {
-                TrySetNearestObstacle(ref nearestObstacle.ValueRW, remainingDistance, ObstacleType.RedLight);
+                TrySetNearestObstacle(ref nearestObstacle.ValueRW, remainingDistanceToSegmentEnd, ObstacleType.RedLight);
             }
         }
     }

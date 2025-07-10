@@ -7,11 +7,7 @@ public struct TrafficController : IComponentData
     public float YellowSignalPercentage;
 }
 
-public struct ControlledTrafficLight : IBufferElementData
+public struct TrafficLightBufferElement : IBufferElementData
 {
-    public Entity Entity;
-
-    public int CurrentState;
-
-    public Entity AssociatedLane;
+    public Entity TrafficLightEntity;
 }

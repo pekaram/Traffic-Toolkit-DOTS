@@ -1,14 +1,15 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 public partial struct TrafficControllerSystem : ISystem
 {
-    private BufferLookup<ControlledTrafficLight> _controlledTrafficLightLookup;
+    private BufferLookup<TrafficLightBufferElement> _controlledTrafficLightLookup;
 
     public void OnCreate(ref SystemState state)
     {
-        _controlledTrafficLightLookup = state.GetBufferLookup<ControlledTrafficLight>(true);
+        _controlledTrafficLightLookup = state.GetBufferLookup<TrafficLightBufferElement>(true);
     }
 
     [BurstCompile]
@@ -31,15 +32,16 @@ public partial struct TrafficControllerSystem : ISystem
             var phaseDuration = controller.ValueRO.CycleTime / lightsBuffer.Length;
             var currentPhase = (int)(controller.ValueRW.ElapsedTime / phaseDuration) % lightsBuffer.Length;
 
-            var elaspsedPhaseTime = controller.ValueRW.ElapsedTime - (phaseDuration * currentPhase);
-            var isYellow = elaspsedPhaseTime / phaseDuration > 1 - controller.ValueRO.YellowSignalPercentage;
+            var elapsedTime = controller.ValueRW.ElapsedTime - (phaseDuration * currentPhase);
+            var isYellow = elapsedTime / phaseDuration > 1 - controller.ValueRO.YellowSignalPercentage;
 
             for (int i = 0; i < lightsBuffer.Length; i++)
             {
-                var lightEntity = lightsBuffer[i].Entity; 
+                var lightEntity = lightsBuffer[i].TrafficLightEntity; 
                 var trafficLight = SystemAPI.GetComponent<TrafficLight>(lightEntity);
 
                 trafficLight.Signal = (i == currentPhase) ? !isYellow ? TrafficLightSignal.Green : TrafficLightSignal.Yellow: TrafficLightSignal.Red;
+
                 SystemAPI.SetComponent(lightEntity, trafficLight);
             }
         }

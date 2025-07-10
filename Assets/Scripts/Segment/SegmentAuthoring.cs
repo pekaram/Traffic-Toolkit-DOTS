@@ -1,7 +1,7 @@
-using UnityEngine;
-using Unity.Entities;
 using System.Collections.Generic;
-using Unity.Mathematics;
+using System.Linq;
+using Unity.Entities;
+using UnityEngine;
 
 public class SegmentAuthoring : MonoBehaviour
 {
@@ -15,9 +15,23 @@ public class SegmentAuthoring : MonoBehaviour
 
     public Vector3 End;
 
+    [HideInInspector]
+    public Vector3 WorldStart;
+
+    [HideInInspector]
+    public Vector3 WorldEnd;
+
+    [HideInInspector]
+    public Vector3 WorldStartTangent;
+
+    [HideInInspector]
+    public Vector3 WorldEndTangent;
+
+    public float SpeedLimit;
+
     public TrafficLightAuthoring AssociatedTrafficLight;
 
-    public List<SegmentAuthoringConnection> ConnectedSegments = new List<SegmentAuthoringConnection>();
+    public List<SegmentAuthoringConnection> ConnectedSegments = new();
 
     class Baker : Baker<SegmentAuthoring>
     { 
@@ -29,41 +43,51 @@ public class SegmentAuthoring : MonoBehaviour
                 trafficLightEntity = GetEntity(authoring.AssociatedTrafficLight, TransformUsageFlags.None);
             }
 
-            var entity = GetEntity(TransformUsageFlags.WorldSpace);
-            AddComponent(entity, new Segment
+            var segmentEntity = GetEntity(TransformUsageFlags.WorldSpace);
+            AddComponent(segmentEntity, new Segment
             {
-                Start = TransformPoint(authoring, authoring.Start),
-                StartTangent = TransformPoint(authoring, authoring.StartTangent),
-                EndTangent = TransformPoint(authoring, authoring.EndTangent),
-                End = TransformPoint(authoring, authoring.End),
-                AssociatedTrafficLight = trafficLightEntity
+                Start = authoring.WorldStart,
+                StartTangent = authoring.WorldStartTangent,
+                EndTangent = authoring.WorldEndTangent,
+                End = authoring.WorldEnd,
+                AssociatedTrafficLight = trafficLightEntity,
+                SpeedLimit = authoring.SpeedLimit,
+                IsDeadEnd = authoring.ConnectedSegments.All(segment => segment.fromT < 1)
             });
 
-            var connections = AddBuffer<SegmentConnection>(entity);
-            foreach (var connection in authoring.ConnectedSegments)
+            BakeConnectors(segmentEntity, authoring);
+        }
+
+        private void BakeConnectors(Entity segmentEntity, SegmentAuthoring authoring)
+        {
+            var connectors = AddBuffer<ConnectorSegmentEntity>(segmentEntity);
+            foreach (var connection in authoring.ConnectedSegments.OrderBy(connection => connection.fromT))
             {
                 if (connection.EndPoint == null)
                     continue;
 
-                var connectionEntity = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
-                AddComponent(connectionEntity, new Segment
+                var connectorSegment = CreateAdditionalEntity(TransformUsageFlags.WorldSpace);
+                AddComponent(connectorSegment, new Segment
                 {
-                    Start = TransformPoint(authoring, authoring.End),
-                    StartTangent = TransformPoint(authoring, connection.StartTangent),
-                    EndTangent = TransformPoint(connection.EndPoint, connection.EndTangent),
-                    End = TransformPoint(connection.EndPoint, connection.EndPoint.Start)
+                    Start = connection.WorldSegment.Start,
+                    StartTangent = connection.WorldSegment.StartTangent,
+                    EndTangent = connection.WorldSegment.EndTangent,
+                    End = connection.WorldSegment.End,
+                    SpeedLimit = connection.EndPoint.SpeedLimit,
+                    IsDeadEnd = false
                 });
-                var connectedSegment = AddBuffer<SegmentConnection>(connectionEntity);
-                var connectedSgementEntity = GetEntity(connection.EndPoint, TransformUsageFlags.None);
-                connectedSegment.Add(new SegmentConnection { ConnectedSegment = connectedSgementEntity });
+                AddComponent(connectorSegment, new Connector
+                {
+                    SegmentA = segmentEntity,
+                    SegmentB = GetEntity(connection.EndPoint, TransformUsageFlags.None),
+                    TransitionT = connection.fromT,
+                    MergeT = connection.toT,
+                    Type = connection.Type
+                });
 
-                connections.Add(new SegmentConnection { ConnectedSegment = connectionEntity });
+
+                connectors.Add(new ConnectorSegmentEntity { Entity = connectorSegment });
             }
-        }
-
-        private float3 TransformPoint(SegmentAuthoring segment, Vector3 localPosition)
-        {
-            return segment.transform.TransformPoint(localPosition);
         }
     }
 }
@@ -71,10 +95,20 @@ public class SegmentAuthoring : MonoBehaviour
 [System.Serializable]
 public class SegmentAuthoringConnection
 {
+    public float fromT;
+
+    public float toT;
+
     [HideInInspector]
     public Vector3 StartTangent;
+ 
     [HideInInspector]
     public Vector3 EndTangent;
 
+    [HideInInspector]
+    public Segment WorldSegment;
+
     public SegmentAuthoring EndPoint;
+
+    public ConnectionType Type;
 }

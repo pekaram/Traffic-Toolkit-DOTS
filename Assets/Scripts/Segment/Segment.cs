@@ -4,15 +4,37 @@ using Unity.Mathematics;
 [System.Serializable]
 public struct Segment : IComponentData
 {
+    // Bezier curve control points
     public float3 Start; 
     public float3 StartTangent; 
     public float3 EndTangent; 
     public float3 End;
 
+    // Traffic Data
     public Entity AssociatedTrafficLight;
+    public float SpeedLimit;
+    public bool IsDeadEnd;
 }
 
-public struct SegmentConnection : IBufferElementData
+public enum ConnectionType
 {
-    public Entity ConnectedSegment;
+    Intersection = 0,
+    LeftAdjacent = 1,
+    RightAdjacent = 2,
+    ZipperMerge = 3,
+}
+
+public struct ConnectorSegmentEntity : IBufferElementData
+{
+    public Entity Entity;
+}
+
+public struct Connector : IComponentData
+{
+    public Entity SegmentA;
+    public Entity SegmentB;
+    public float TransitionT;
+    public float MergeT;
+
+    public ConnectionType Type; 
 }

@@ -51,10 +51,10 @@ namespace Bezier
 
         public static Vector3 EvaluateCubicBezier(SegmentAuthoring segment, float t)
         {
-            var p0 = segment.Start;
-            var p1 = segment.StartTangent;
-            var p2 = segment.EndTangent;
-            var p3 = segment.End;
+            var p0 = segment.WorldStart;
+            var p1 = segment.WorldStartTangent;
+            var p2 = segment.WorldEndTangent;
+            var p3 = segment.WorldEnd;
 
             float u = 1 - t;
             return u * u * u * p0 +

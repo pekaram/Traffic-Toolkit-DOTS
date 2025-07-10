@@ -1,9 +1,10 @@
-using UnityEngine;
+using Bezier;
 using Unity.Entities;
+using UnityEngine;
 
 class VehicleAuthoring : MonoBehaviour
 {
-    [Range(0.5f,1.5f)]
+    [Range(0.5f, 1.5f)]
     public float DriverSpeedBias = 1;
     public SegmentAuthoring Segment;
     public float T;

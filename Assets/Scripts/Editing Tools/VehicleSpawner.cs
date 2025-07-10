@@ -1,7 +1,6 @@
 using Bezier;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -19,11 +18,13 @@ public class VehicleSpawnerEditor : Editor
 
         var spawner = (VehicleSpawner)target;
 
+        GUI.enabled = !spawner.Any;
         if (GUILayout.Button("Spawn Vehicles"))
         {
             spawner.SpawnVehicles();
         }
 
+        GUI.enabled = spawner.Any;
         if (GUILayout.Button("Clear Vehicles"))
         {
             spawner.DestroySpawnedVehicles();
@@ -42,8 +43,17 @@ public class VehicleSpawner : MonoBehaviour
     public Transform _parentContainer;
     public float _vehicleCount;
 
+    public bool Any => _spawnedVehicles.Any();
+
+
     public void SpawnVehicles()
     {
+        if (_spawnedVehicles.Any())
+        {
+            Debug.LogError("Vehicles already spawned. Clear them first");
+            return;
+        }
+
         for (int i = 0; i < _vehicleCount; i++)
         {     
             var vehicle = PrefabUtility.InstantiatePrefab(_vehiclePrefab, _parentContainer).GameObject();
@@ -56,17 +66,15 @@ public class VehicleSpawner : MonoBehaviour
             vehicleSettings.DriverSpeedBias = Random.Range(0.5f, 1.5f);
             vehicle.name = $"{_vehiclePrefab.name} {_spawnedVehicles.Count}";
 
-            var spawnPos = BezierUtilities.EvaluateCubicBezier(_targetSegment, t);
-            var worldSegment = _targetSegment.transform.TransformPoint(_targetSegment.Start);
-            var worldSegmentEnd = _targetSegment.transform.TransformPoint(_targetSegment.End);
-            vehicleTransform.position = _targetSegment.transform.TransformPoint(spawnPos);
-            vehicleTransform.rotation = Quaternion.LookRotation(worldSegmentEnd - worldSegment);
+            var spawnPosition = BezierUtilities.EvaluateCubicBezier(_targetSegment, t);
+            var spawnRotation = Quaternion.LookRotation(BezierUtilities.EvaluateCubicBezier(_targetSegment, t + 0.1f) - spawnPosition);
+            vehicleTransform.SetPositionAndRotation(spawnPosition, spawnRotation);
             vehicleTransform.SetParent(_parentContainer);
 
             _spawnedVehicles.Add(vehicle);
-
-            EditorUtility.SetDirty(_parentContainer);
         }
+
+        EditorUtility.SetDirty(_parentContainer);
     }
 
     public void DestroySpawnedVehicles()
